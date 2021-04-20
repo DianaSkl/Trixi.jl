@@ -193,6 +193,9 @@ end
     # x direction
     # use consistency of the volume flux to make this evaluation cheaper
     flux1 = flux(u_node, 1, equations)
+    @show alpha
+    @show derivative_split[i, i]
+    @show flux1
     integral_contribution = alpha * derivative_split[i, i] * flux1
     add_to_node_vars!(du, integral_contribution, equations, dg, i, element)
     # use symmetry of the volume flux for the remaining terms
