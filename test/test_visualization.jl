@@ -16,11 +16,18 @@ isdir(outdir) && rm(outdir, recursive=true)
 
 # Run various visualization tests
 @testset "Visualization tests" begin
-  # Run Trixi
-  @test_nowarn_debug trixi_include(@__MODULE__, joinpath(examples_dir(), "2d", "elixir_euler_blast_wave_amr.jl"),
-                                   tspan=(0,0.1))
+  # Run 2D tests with elixirs for both mesh types
+  test_examples_2d = Dict(
+    "TreeMesh" => "elixir_euler_blast_wave_amr.jl",
+    "CurvedMesh" => "elixir_euler_source_terms_waving_flag.jl",
+    "UnstructuredQuadMesh" => "elixir_euler_unstructured_quad.jl"
+  )
 
-  @testset "PlotData2D, PlotDataSeries2D, PlotMesh2D" begin
+  @testset "PlotData2D, PlotDataSeries2D, PlotMesh2D with $mesh" for mesh in keys(test_examples_2d)
+    # Run Trixi
+    @test_nowarn_debug trixi_include(@__MODULE__, joinpath(examples_dir(), "2d", test_examples_2d[mesh]),
+                                     tspan=(0,0.1))
+
     # Constructor
     @test PlotData2D(sol) isa PlotData2D
     @test PlotData2D(sol; nvisnodes=0, grid_lines=false, solution_variables=cons2cons) isa PlotData2D
@@ -61,15 +68,15 @@ isdir(outdir) && rm(outdir, recursive=true)
     @test getmesh(pd).plot_data == pd
     @test_nowarn_debug show(stdout, getmesh(pd))
     println(stdout)
-  end
 
-  @testset "2D plot recipes" begin
-    pd = PlotData2D(sol)
+    @testset "2D plot recipes" begin
+      pd = PlotData2D(sol)
 
-    @test_nowarn_debug plot(sol)
-    @test_nowarn_debug plot(pd)
-    @test_nowarn_debug plot(pd["p"])
-    @test_nowarn_debug plot(getmesh(pd))
+      @test_nowarn_debug plot(sol)
+      @test_nowarn_debug plot(pd)
+      @test_nowarn_debug plot(pd["p"])
+      @test_nowarn_debug plot(getmesh(pd))
+    end
   end
 
   @testset "PlotData1D, PlotDataSeries1D, PlotMesh1D" begin
@@ -115,6 +122,13 @@ isdir(outdir) && rm(outdir, recursive=true)
     @test_nowarn_debug show(stdout, getmesh(pd))
     println(stdout)
 
+    # nvisnodes
+    @test size(pd.data) == (512, 3)
+    pd0 = PlotData1D(sol, nvisnodes=0)
+    @test size(pd0.data) == (256, 3)
+    pd2 = PlotData1D(sol, nvisnodes=2)
+    @test size(pd2.data) == (128, 3)
+
     @testset "1D plot recipes" begin
       pd = PlotData1D(sol)
 
@@ -131,14 +145,14 @@ isdir(outdir) && rm(outdir, recursive=true)
       data1d = rand(5, 11)
       variable_names = string.('a':'e')
       mesh_vertices_x1d = [x[begin], x[end]]
-      fake1d = PlotData1D(x, data1d, variable_names, mesh_vertices_x1d)
+      fake1d = PlotData1D(x, data1d, variable_names, mesh_vertices_x1d, 0)
       @test_nowarn_debug plot(fake1d)
 
       y = x
       data2d = [rand(11,11) for _ in 1:5]
       mesh_vertices_x2d = [0.0, 1.0, 1.0, 0.0]
       mesh_vertices_y2d = [0.0, 0.0, 1.0, 1.0]
-      fake2d = PlotData2D(x, y, data2d, variable_names, mesh_vertices_x2d, mesh_vertices_y2d)
+      fake2d = PlotData2D(x, y, data2d, variable_names, mesh_vertices_x2d, mesh_vertices_y2d, 0, 0)
       @test_nowarn_debug plot(fake2d)
     end
   end

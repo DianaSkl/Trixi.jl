@@ -1,11 +1,10 @@
 
-function limiter_zhang_shu!(u::AbstractArray{<:Any,3},
-                            threshold::Real, variable,
-                            mesh, equations, dg::DGSEM, cache)
+function limiter_zhang_shu!(u, threshold::Real, variable,
+                            mesh::AbstractMesh{1}, equations, dg::DGSEM, cache)
   @unpack weights = dg.basis
 
   @threaded for element in eachelement(dg, cache)
-    # dermine minimum value
+    # determine minimum value
     value_min = typemax(eltype(u))
     for i in eachnode(dg)
       u_node = get_node_vars(u, equations, dg, i, element)

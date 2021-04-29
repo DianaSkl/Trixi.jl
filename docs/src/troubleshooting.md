@@ -1,4 +1,4 @@
-# Troubleshooting
+# Troubleshooting and FAQ
 
 ## [Installing Trixi as a package only provides an older release](@id old-release)
 Trixi requires fairly recent versions of several of its dependencies, which
@@ -105,3 +105,26 @@ installing JuliaMono is as simple as
 $ brew tap homebrew/cask-fonts
 $ brew install --cask font-juliamono
 ```
+
+
+## There are no timing results of the initial mesh creation
+
+By default, the [`SummaryCallback`](@ref) resets the timer used internally by Trixi when it is
+initialized (when `solve` is called). If this step needs to be timed, e.g. to debug performance
+problems, explicit timings can be used as follows.
+
+```julia
+using Trixi
+
+begin
+  Trixi.reset_timer!(Trixi.timer())
+
+  equations = LinearScalarAdvectionEquation2D(1.0, -0.3)
+  mesh = TreeMesh((-1.0, -1.0), (1.0, 1.0), n_cells_max=10^5, initial_refinement_level=5)
+  solver = DGSEM(3)
+  semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition_convergence_test, solver)
+
+  Trixi.print_timer(Trixi.timer())
+end
+```
+
