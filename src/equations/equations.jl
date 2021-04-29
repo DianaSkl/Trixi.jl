@@ -109,6 +109,9 @@ include("linear_scalar_advection_1d.jl")
 include("linear_scalar_advection_2d.jl")
 include("linear_scalar_advection_3d.jl")
 
+abstract type AbstractIsothermalEulerEquations{NDIMS, NVARS} <: AbstractEquations{NDIMS, NVARS} end
+include("isothermal_euler_1d.jl")
+
 # Inviscid Burgers
 abstract type AbstractInviscidBurgersEquation{NDIMS, NVARS} <: AbstractEquations{NDIMS, NVARS} end
 include("inviscid_burgers_1d.jl")
@@ -118,9 +121,6 @@ abstract type AbstractCompressibleEulerEquations{NDIMS, NVARS} <: AbstractEquati
 include("compressible_euler_1d.jl")
 include("compressible_euler_2d.jl")
 include("compressible_euler_3d.jl")
-
-# abstract type AbstractIsothermalEulerEquations{NDIMS, NVARS} <: AbstractEquations{NDIMS, NVARS} end
-# include("isothermal_euler_1d")
 
 # CompressibleEulerMulticomponentEquations
 abstract type AbstractCompressibleEulerMulticomponentEquations{NDIMS, NVARS, NCOMP} <: AbstractEquations{NDIMS, NVARS} end
