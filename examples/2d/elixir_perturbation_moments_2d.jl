@@ -1,7 +1,7 @@
 using OrdinaryDiffEq
 using Trixi
 
-equations = PerturbationMomentSystem2D(2.0, 2.0, 4.0)
+equations = PerturbationMomentSystem2D(0.0, 0.0, 1.0)
 
 
 initial_condition = initial_condition_constant 
@@ -15,7 +15,7 @@ mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=3, n_
 #semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms = source_terms_convergence_test)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 
-tspan = (0.0, 4.0)
+tspan = (0.0, 0.9)
 ode = semidiscretize(semi, tspan)
 
 # At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
@@ -35,7 +35,7 @@ alive_callback = AliveCallback(analysis_interval=analysis_interval)
 save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-stepsize_callback = StepsizeCallback(cfl=0.1)
+stepsize_callback = StepsizeCallback(cfl=0.9)
 
 save_restart = SaveRestartCallback(interval=100,
                                    save_final_restart=true)

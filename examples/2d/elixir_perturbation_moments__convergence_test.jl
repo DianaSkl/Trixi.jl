@@ -15,6 +15,11 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 tspan = (0.0, 1.0)
 ode = semidiscretize(semi, tspan)
 
+
+# At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
+# and resets the timers
+summary_callback = SummaryCallback()
+
 analysis_interval = 100
 
 # The AnalysisCallback allows to analyse the solution in regular intervals and prints the results
