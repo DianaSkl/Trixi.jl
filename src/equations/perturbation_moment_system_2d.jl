@@ -53,71 +53,82 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   end
   
   @inline function max_abs_speed_naive(u_ll, u_rr, orientation::Integer, equations::PerturbationMomentSystem2D)
-      return 2.0
+    @unpack vxr, theta_r = equations
+
+    ab1 = abs(vxr) + 2.0 * sqrt(5 * theta_r / 3)
+
+    return ab1
+ 
   end
   
   @inline function max_abs_speeds(u, equations::PerturbationMomentSystem2D)
-    return 2.0, 2.0
+    @unpack vxr, vyr, theta_r = equations
+
+    ab1 = abs(vxr) + 2.0 * sqrt(5 * theta_r / 3)
+    ab2 = abs(vyr) + 2.0 * sqrt(5 * theta_r / 3)
+
+    return SVector(ab1, ab2)
+    
   end
   
   #source function for all source terms to be 0:
 
-  # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem2D)
-  #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-  #   tau  = calc_tau()
-  
-  #   du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-  #   du2 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-  #   du3 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-  #   du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-  #   du5 = 2.0 * w1 * w0y / 3.0  + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
-    
-  #   #println(SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau))
-  
-  #   return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
-  # end
-
-
   @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem2D)
+    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
+    tau  = calc_tau()
+  
+    du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
+    du2 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
+    du3 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+    du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
+    du5 = 2.0 * w1 * w0y / 3.0  + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
     
-  @unpack vxr, vyr, theta_r = equations
-
-    stheta = sqrt(theta_r)
-    tau = calc_tau()
-    v = 1
-    c = 2
-    A = 0.1
-    L = 2
-    J = 3
-    K = 6
-    D = 8
-    f = 1/L
-    g = 5/K
-    j = J/5
-    d = D/15
-
-    h = 1/tau
-    ω = 2 * pi * f
-
-    ini1 = c + A * sin(ω * (x[1] + x[2] - t))
-    ini2 = ini1^2
-
-    tmp1 = ω * A * cos(ω * (x[1] + x[2] - t))
-    tmp2 = vxr + vyr - v
-
-    du1 = tmp1 * (tmp2 + c * stheta)
-    du2 = tmp1 * (tmp2 + c * c * stheta)
-    #du3 = tmp1 * (tmp2 + c * c * stheta)
-    #du4 = tmp1 * (tmp2 + c * stehta)
-    du5 = tmp1 * tmp2 + h * g * ini2
-    du6 = tmp1 * tmp2 + h * f * ini2
-    #du7 = tmp1 * tmp2 + h * g * ini2
-    du8 = tmp1 * (tmp2 - j) - h * d * ini2
-    #du9 = tmp1 * (tmp2 - j) - h * d * ini2
+    #println(SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau))
+  
+    return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
+  end
 
 
-    return SVector(du1, du2, du2, du1, du5, du6, du5, du8, du8)
-  end 
+  # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem2D)
+    
+  # @unpack vxr, vyr, theta_r = equations
+
+  #   stheta = sqrt(theta_r)
+  #   tau = calc_tau()
+  #   v = 1
+  #   c = 2
+  #   A = 0.1
+  #   L = 2
+  #   J = 3
+  #   K = 6
+  #   D = 8
+  #   f = 1/L
+  #   g = 5/K
+  #   j = J/5
+  #   d = D/15
+
+  #   h = 1/tau
+  #   ω = 2 * pi * f
+
+  #   ini1 = c + A * sin(ω * (x[1] + x[2] - t))
+  #   ini2 = ini1^2
+
+  #   tmp1 = ω * A * cos(ω * (x[1] + x[2] - t))
+  #   tmp2 = vxr + vyr - v
+
+  #   du1 = tmp1 * (tmp2 + c * stheta)
+  #   du2 = tmp1 * (tmp2 + c * c * stheta)
+  #   #du3 = tmp1 * (tmp2 + c * c * stheta)
+  #   #du4 = tmp1 * (tmp2 + c * stehta)
+  #   du5 = tmp1 * tmp2 + h * g * ini2
+  #   du6 = tmp1 * tmp2 + h * f * ini2
+  #   #du7 = tmp1 * tmp2 + h * g * ini2
+  #   du8 = tmp1 * (tmp2 - j) - h * d * ini2
+  #   #du9 = tmp1 * (tmp2 - j) - h * d * ini2
+
+
+  #   return SVector(du1, du2, du2, du1, du5, du6, du5, du8, du8)
+  # end 
   
   function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem2D)
     c = 2
@@ -160,7 +171,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   function initial_condition_constant(x, t, equations::PerturbationMomentSystem2D)
   
-  
+
     return SVector(init_w0(x, t, equations::PerturbationMomentSystem2D), 
                    init_w0x(x, t, equations::PerturbationMomentSystem2D), 
                    init_w0y(x, t, equations::PerturbationMomentSystem2D), 
@@ -176,11 +187,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   @inline function init_w0(x, t, equations::PerturbationMomentSystem2D)
    
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = 3 - rho_r
   
    
     w0 = 1 + drho / rho_r
@@ -194,11 +201,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
 
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = 3 - rho_r
 
     dv_x = 0
     
@@ -211,11 +214,8 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = 3 - rho_r
+
     dv_y = 0
     
     w0y = dv_y / sqrt(theta_r) + (drho * dv_y)/(rho_r * sqrt(theta_r))
@@ -227,11 +227,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = 3 - rho_r
     dv_y = 0
     dv_x = 0
     dtheta = 0
@@ -247,11 +243,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
 
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = 3 - rho_r
     dv_y = 0
     dv_x = 0
 
@@ -266,11 +258,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = 3 - rho_r
     dv_y = 0
     dv_x = 0
     sigma_yy = 0
@@ -285,11 +273,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = 3 - rho_r
     dv_y = 0
     dv_x = 0
     sigma_xy = 0
@@ -306,11 +290,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+   
     dv_y = 0
     dv_x = 0
     sigma_xy = 0
@@ -332,11 +312,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
     dtheta = 0
     rho_r = 1
-    if (x[1] < 0 && x[2] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+   
     dv_y = 0
     dv_x = 0
     sigma_xy = 0

@@ -1,20 +1,22 @@
 using OrdinaryDiffEq
 using Trixi
 
-equations = PerturbationMomentSystem2D(0.0, 0.0, 1.0)
+equations = PerturbationMomentSystem1D(0.0, 1.0)
 
-initial_condition = initial_condition_convergence_test
+
+initial_condition = initial_condition_constant 
 
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
-coordinates_min = (-2, -2)
-coordinates_max = ( 2,  2)
+coordinates_min = (-2,)
+coordinates_max = ( 2,)
+
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=3, n_cells_max=10_000)
-semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms = source_terms_convergence_test)
+#semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms = source_terms_convergence_test)
+semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 
-tspan = (0.0, 1.0)
+tspan = (0.0, 4.0)
 ode = semidiscretize(semi, tspan)
-
 
 # At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
 # and resets the timers
@@ -50,3 +52,6 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_
 
 # Print the timer summary
 summary_callback()
+
+pd = PlotData1D(sol; solution_variables=cons2prim)
+plot(pd)

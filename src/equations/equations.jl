@@ -281,6 +281,8 @@ include("compressible_euler_multicomponent_2d.jl")
 # PerturbationMoments
 abstract type AbstractPerturbationMomentSystem2D{NDIMS, NVARS} <: AbstractEquations{NDIMS, NVARS} end
 include("perturbation_moment_system_2d.jl")
+include("alternative_perturbation_moment_system_2d.jl")
+include("perturbation_moment_system_1d.jl")
 
 # Retrieve number of components from equation instance for the multicomponent case
 @inline ncomponents(::AbstractCompressibleEulerMulticomponentEquations{NDIMS, NVARS, NCOMP}) where {NDIMS, NVARS, NCOMP} = NCOMP

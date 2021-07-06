@@ -9,13 +9,13 @@ initial_condition = initial_condition_constant
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
 
-coordinates_min = (-2, -2)
-coordinates_max = ( 2,  2)
+coordinates_min = (0, 0)
+coordinates_max = (2, 2)
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=3, n_cells_max=10_000)
 #semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms = source_terms_convergence_test)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 
-tspan = (0.0, 0.9)
+tspan = (0.0, 4.0)
 ode = semidiscretize(semi, tspan)
 
 # At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
