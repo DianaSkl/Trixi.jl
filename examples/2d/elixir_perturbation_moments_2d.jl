@@ -9,8 +9,8 @@ initial_condition = initial_condition_constant
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
 
-coordinates_min = (0, 0)
-coordinates_max = (2, 2)
+coordinates_min = (-1, 1)
+coordinates_max = (1, 1)
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=3, n_cells_max=10_000)
 #semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms = source_terms_convergence_test)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
@@ -52,3 +52,10 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_
 
 # Print the timer summary
 summary_callback()
+
+
+pd = PlotData1D(sol; solution_variables=cons2prim)
+#plot(pd["rho"], ylims = (0,3.5), xguide="x", yguide="y")
+#plot(pd["vx"], ylims = (-1.0,1.0), xguide="x", yguide="y")
+#plot(pd["theta"], ylims = (0.5,1.5), xguide="x", yguide="y")
+plot(pd)

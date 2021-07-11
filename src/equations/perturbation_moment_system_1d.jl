@@ -4,7 +4,8 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     theta_r::RealT
   end
   
-  varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "v_x", "v_y", "theta", "sigma_xx", "sigma_xy", "sigma_yy", "qx", "qy")
+  #varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "v_x", "v_y", "theta", "sigma_xx", "sigma_xy", "sigma_yy", "qx", "qy")
+  varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "vx", "theta")
   varnames(::typeof(cons2cons), ::PerturbationMomentSystem1D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
   
   @inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem1D)
@@ -35,22 +36,24 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   @inline function cons2prim(u, equations::PerturbationMomentSystem1D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
+    @unpack vxr, theta_r = equations
     rho_r = 1.0
-    vxr = 0.0
-    vyr = 0.0
-    theta_r = 1.0
+
 
     rho = w0 * rho_r
+    # print("rho=")
+    # println(rho)
     v_x = vxr + w0x * sqrt(theta_r) / w0
-    v_y = vyr + w0y * sqrt(theta_r) / w0
-    theta = theta_r - (w0x^2*theta_r)/(3 * w0^2) - (w0y^2*theta_r)/(3 * w0^2) - (w1*theta_r)/(3 * w0)
-    sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r + (w0y^2 * theta_r * rho_r)/(3 * w0)
-    sigma_xy = 2 * w0xy * theta_r * rho_r - (w0x * w0y * theta_r * rho_r)/w0
-    sigma_yy = (w0x^2 * theta_r * rho_r)/(3 * w0) - (2*w0y^2*theta_r*rho_r)/(3*w0)+2*w0yy*theta_r*rho_r
-    q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0 - (2*w0xy*w0y*sqrt(theta_r)^3*rho_r)/w0 + (w0x*w0y^2*sqrt(theta_r)^3 * rho_r)/w0^2 + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
-    q_y = - (2*w0x * w0xy * sqrt(theta_r)^3*rho_r)/w0 + (w0x^2 * w0y * sqrt(theta_r)^3 * rho_r)/w0^2 + (w0y^3*sqrt(theta_r)^3 * rho_r)/w0^2 - (2*w0y *w0yy* sqrt(theta_r)^3 * rho_r)/w0 + (5*w0y*w1*sqrt(theta_r)^3*rho_r)/2*w0 - (5*w1y*sqrt(theta_r)^3*rho_r)/2
+    #v_y = vyr + w0y * sqrt(theta_r) / w0
+    theta = theta_r - (w0x^2 * theta_r)/(3 * w0^2) - (w0y^2 * theta_r)/(3 * w0^2) - (w1 * theta_r)/ w0
+    # sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r + (w0y^2 * theta_r * rho_r)/(3 * w0)
+    # sigma_xy = 2 * w0xy * theta_r * rho_r - (w0x * w0y * theta_r * rho_r)/w0
+    # sigma_yy = (w0x^2 * theta_r * rho_r)/(3 * w0) - (2*w0y^2*theta_r*rho_r)/(3*w0)+2*w0yy*theta_r*rho_r
+    # q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0 - (2*w0xy*w0y*sqrt(theta_r)^3*rho_r)/w0 + (w0x*w0y^2*sqrt(theta_r)^3 * rho_r)/w0^2 + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
+    # q_y = - (2*w0x * w0xy * sqrt(theta_r)^3*rho_r)/w0 + (w0x^2 * w0y * sqrt(theta_r)^3 * rho_r)/w0^2 + (w0y^3*sqrt(theta_r)^3 * rho_r)/w0^2 - (2*w0y *w0yy* sqrt(theta_r)^3 * rho_r)/w0 + (5*w0y*w1*sqrt(theta_r)^3*rho_r)/2*w0 - (5*w1y*sqrt(theta_r)^3*rho_r)/2
 
-    return SVector(rho, v_x, v_y, theta, sigma_xx, sigma_xy, sigma_yy, q_x, q_y)
+    
+    return SVector(rho, v_x, theta)
   
  
   end
@@ -97,17 +100,15 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   # end
 
 
-  @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
+  # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
     
-  @unpack vxr, vyr, theta_r = equations
+  # @unpack vxr, vyr, theta_r = equations
 
-    stheta = sqrt(theta_r)
-    tau = calc_tau()
+  #   stheta = sqrt(theta_r)
+  #   tau = calc_tau()
 
-
-
-    return SVector(du1, du2, du2, du1, du5, du6, du5, du8, du8)
-  end 
+  #   return SVector(du1, du2, du2, du1, du5, du6, du5, du8, du8)
+  # end 
   
   function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem1D)
     c = 2
@@ -192,7 +193,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     dv_x = 0
     
     w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
-    
+
    return w0x
   end
   
