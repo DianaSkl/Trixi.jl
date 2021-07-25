@@ -46,6 +46,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     v_x = vxr + w0x * sqrt(theta_r) / w0
     #v_y = vyr + w0y * sqrt(theta_r) / w0
     theta = theta_r - (w0x^2 * theta_r)/(3 * w0^2) - (w0y^2 * theta_r)/(3 * w0^2) - (w1 * theta_r)/ w0
+    # println(theta)
     # sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r + (w0y^2 * theta_r * rho_r)/(3 * w0)
     # sigma_xy = 2 * w0xy * theta_r * rho_r - (w0x * w0y * theta_r * rho_r)/w0
     # sigma_yy = (w0x^2 * theta_r * rho_r)/(3 * w0) - (2*w0y^2*theta_r*rho_r)/(3*w0)+2*w0yy*theta_r*rho_r
@@ -110,27 +111,41 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   #   return SVector(du1, du2, du2, du1, du5, du6, du5, du8, du8)
   # end 
   
-  function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem1D)
-    c = 2
-    A = 0.1
-    L = 2
-    K = 3
-    f = 1/L
-    g = 1/K
-    ω = 2 * pi * f
-    ini = c + A * sin(ω * (x[1] + x[2] - t))
+  # function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem1D)
+  #   c = 2
+  #   A = 0.1
+  #   L = 2
+  #   K = 3
+  #   f = 1/L
+  #   g = 1/K
+  #   ω = 2 * pi * f
+  #   ini = c + A * sin(ω * (x[1] + x[2] - t))
 
-    w0 = ini
-    w0x = ini
-    w0y = ini
-    w1 = ini
-    w0xx = ini
-    w0xy = ini
-    w0yy = ini
-    w1x = ini
-    w1y = ini
+  #   w0 = ini
+  #   w0x = ini
+  #   w0y = ini
+  #   w1 = ini
+  #   w0xx = ini
+  #   w0xy = ini
+  #   w0yy = ini
+  #   w1x = ini
+  #   w1y = ini
   
-    return SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
+  #   return SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
+  # end
+
+  function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem1D)
+ 
+    return SVector(init_w0(x, t, equations::PerturbationMomentSystem1D), 
+                   init_w0x(x, t, equations::PerturbationMomentSystem1D), 
+                   init_w0y(x, t, equations::PerturbationMomentSystem1D), 
+                   init_w1(x, t, equations::PerturbationMomentSystem1D),
+                   init_w0xx(x, t, equations::PerturbationMomentSystem1D),
+                   init_w0yy(x, t, equations::PerturbationMomentSystem1D),
+                   init_w0xy(x, t, equations::PerturbationMomentSystem1D), 
+                   init_w1x(x, t, equations::PerturbationMomentSystem1D),
+                   init_w1y(x, t, equations::PerturbationMomentSystem1D))
+  
   end
   
   function calc_tau()
