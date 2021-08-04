@@ -95,8 +95,8 @@ plot!(x,rho, label = "FVV")
 # plot(pd.x, pd.data[:,3], xlims = (-1.0,1.0), ylims = (0.5, 1.5), label = "DGSEM", title ="theta, t = 0.4", seriestype = :scatter, markersize=2)
 # plot!(x,theta, label = "FVV")
 
-# #theta allein
-#plot(pd.x, pd.data[:,3], xlims = (-1.0,1.0), ylims = (-80.0 , 10.0), label = "DGSEM", title ="theta, t = 0.4", seriestype = :scatter, markersize=2)
+#theta allein
+#plot(pd.x, pd.data[:,3], xlims = (-1.0,1.0), ylims = (-0.5 , 2.0), label = "DGSEM", title ="theta, t = 0.4", seriestype = :scatter, markersize=2)
 
 
 

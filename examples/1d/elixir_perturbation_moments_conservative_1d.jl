@@ -72,6 +72,16 @@ pd = PlotData1D(sol; solution_variables=cons2cons)
 plot(pd.x, pd.data[:,1], xlims = (-1.0,1.0), label = "DGSEM", title ="w0, t = 0.4", seriestype = :scatter, markersize=1)
 plot!(x,w0, label = "FVV")
 
+# w0x plot
+plot(pd.x, pd.data[:,2], xlims = (-1.0,1.0), label = "DGSEM", title ="w0x, t = 0.4", seriestype = :scatter, markersize=1)
+plot!(x,w0x, label = "FVV")
+
+# w0y plot
+plot(pd.x, pd.data[:,3], xlims = (-1.0,1.0), label = "DGSEM", title ="w0y, t = 0.4", seriestype = :scatter, markersize=1)
+plot!(x,w0y, label = "FVV")
+
+# w0xy plot 
+#plot(pd.x, pd.data[:,7], xlims = (-1.0,1.0), label = "DGSEM", title ="w0y, t = 0.4", seriestype = :scatter, markersize=1)
 
 
 #savefig("plot0,05.pdf")
