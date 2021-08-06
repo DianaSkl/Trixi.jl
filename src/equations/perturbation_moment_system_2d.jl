@@ -3,7 +3,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     vyr::RealT
     theta_r::RealT
   end
-  varnames(::typeof(cons2prim), ::PerturbationMomentSystem2D) = ("rho", "vx", "theta")
+  varnames(::typeof(cons2prim), ::PerturbationMomentSystem2D) = ("rho", "vx", "vy", "theta")
   varnames(::typeof(cons2cons), ::PerturbationMomentSystem2D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
   
   @inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem2D)
@@ -40,13 +40,13 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   @inline function cons2prim(u, equations::PerturbationMomentSystem2D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-    @unpack vxr, theta_r = equations
+    @unpack vxr, vyr, theta_r = equations
     rho_r = 1.0
 
 
     rho = w0 * rho_r
     v_x = vxr + w0x * sqrt(theta_r) / w0
-    #v_y = vyr + w0y * sqrt(theta_r) / w0
+    v_y = vyr + w0y * sqrt(theta_r) / w0
     theta = theta_r - (w0x^2 * theta_r)/(3 * w0^2) - (w0y^2 * theta_r)/(3 * w0^2) - (w1 * theta_r)/ w0
     # sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r + (w0y^2 * theta_r * rho_r)/(3 * w0)
     # sigma_xy = 2 * w0xy * theta_r * rho_r - (w0x * w0y * theta_r * rho_r)/w0
@@ -55,10 +55,15 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     # q_y = - (2*w0x * w0xy * sqrt(theta_r)^3*rho_r)/w0 + (w0x^2 * w0y * sqrt(theta_r)^3 * rho_r)/w0^2 + (w0y^3*sqrt(theta_r)^3 * rho_r)/w0^2 - (2*w0y *w0yy* sqrt(theta_r)^3 * rho_r)/w0 + (5*w0y*w1*sqrt(theta_r)^3*rho_r)/2*w0 - (5*w1y*sqrt(theta_r)^3*rho_r)/2
 
     
-    return SVector(rho, v_x, theta)
+    return SVector(rho, v_x, v_y, theta)
   
  
   end
+
+  @inline function density_pressure(u, equations::PerturbationMomentSystem2D)
+    rho = 1.0
+    return rho
+   end
   
   
   @inline function cons2entropy(u, equations::PerturbationMomentSystem2D)
@@ -200,12 +205,17 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   
   @inline function init_w0(x, t, equations::PerturbationMomentSystem2D)
-   
+
     rho_r = 1
-    drho = 3 - rho_r
+    if (x[1] < 0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
   
    
     w0 = 1 + drho / rho_r
+    
     
    return w0
   end
@@ -216,11 +226,16 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
 
     rho_r = 1
-    drho = 3 - rho_r
+    if (x[1] <  0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
 
     dv_x = 0
     
     w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
+
     
    return w0x
   end
@@ -229,8 +244,11 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    drho = 3 - rho_r
-
+    if (x[1] <  0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
     dv_y = 0
     
     w0y = dv_y / sqrt(theta_r) + (drho * dv_y)/(rho_r * sqrt(theta_r))
@@ -242,7 +260,11 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    drho = 3 - rho_r
+    if (x[1] <  0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
     dv_y = 0
     dv_x = 0
     dtheta = 0
@@ -258,9 +280,14 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
 
     rho_r = 1
-    drho = 3 - rho_r
+    if (x[1] <  0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
     dv_y = 0
     dv_x = 0
+
 
     sigma_xx = 0
     
@@ -273,7 +300,11 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    drho = 3 - rho_r
+    if (x[1] < 0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
     dv_y = 0
     dv_x = 0
     sigma_yy = 0
@@ -288,7 +319,11 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    drho = 3 - rho_r
+    if (x[1] < 0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
     dv_y = 0
     dv_x = 0
     sigma_xy = 0
@@ -305,7 +340,11 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-   
+    if (x[1] < 0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
     dv_y = 0
     dv_x = 0
     sigma_xy = 0
@@ -327,7 +366,11 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
     dtheta = 0
     rho_r = 1
-   
+    if (x[1] <  0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
     dv_y = 0
     dv_x = 0
     sigma_xy = 0

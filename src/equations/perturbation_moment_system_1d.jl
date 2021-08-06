@@ -4,7 +4,6 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     theta_r::RealT
   end
   
-  #varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "v_x", "v_y", "theta", "sigma_xx", "sigma_xy", "sigma_yy", "qx", "qy")
   varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "vx", "theta")
   varnames(::typeof(cons2cons), ::PerturbationMomentSystem1D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
   
@@ -22,17 +21,10 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
       f7  = vxr * w0xy + sqrt(theta_r) * (w0y - w1y)/2.0 
       f8  = vxr * w1x + sqrt(theta_r) * (w1 - 4.0 * w0xx/5.0)
       f9  = vxr * w1y - 4.0 * sqrt(theta_r) * w0xy / 5.0
-  
-    
     
     return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
   end
   
-  # @inline function cons2prim(u, equations::PerturbationMomentSystem1D)
-  #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-  
-  #   return SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
-  # end
   
   @inline function cons2prim(u, equations::PerturbationMomentSystem1D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
@@ -55,8 +47,6 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
     
     return SVector(rho, v_x, theta)
-  
- 
   end
 
   
@@ -79,26 +69,29 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
     ab1 = abs(vxr) + 2.0 * sqrt(5 * theta_r / 3)
 
-
     return ab1
   end
   
-  #source function for all source terms to be 0:
 
-  # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
-  #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-  #   tau  = calc_tau()
+  @inline function density_pressure(u, equations::PerturbationMomentSystem1D)
+    rho = 1.0
+    return rho
+  end
+
+
+  @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
+    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
+    tau  = calc_tau()
   
-  #   du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-  #   du2 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-  #   du3 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-  #   du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-  #   du5 = 2.0 * w1 * w0y / 3.0  + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
-    
-  #   #println(SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau))
-  
-  #   return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
-  # end
+    du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
+    du2 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
+    du3 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+    du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
+    du5 = 2.0 * w1 * w0y / 3.0  + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
+      
+    return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
+
+  end
 
 
   # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
@@ -160,6 +153,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     p = 41.3
 
     tau = mu/p
+    tau = 0.2
     return(tau)
 
   end

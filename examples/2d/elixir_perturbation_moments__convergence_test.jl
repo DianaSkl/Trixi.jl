@@ -3,12 +3,16 @@ using Trixi
 
 equations = PerturbationMomentSystem2D(0.0, 0.0, 1.0)
 
-initial_condition = initial_condition_convergence_test
+initial_condition = initial_condition_constant
 
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
-coordinates_min = (-2, -2)
-coordinates_max = ( 2,  2)
+boundary_condition = BoundaryConditionDirichlet(initial_condition)
+boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition, y_neg=boundary_condition, y_pos=boundary_condition)
+
+
+coordinates_min = (-1, -1)
+coordinates_max = ( 1,  1)
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=3, n_cells_max=10_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms = source_terms_convergence_test)
 
@@ -50,3 +54,6 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_
 
 # Print the timer summary
 summary_callback()
+
+pd = PlotData1D(sol; solution_variables=cons2prim)
+#plot(pd)
