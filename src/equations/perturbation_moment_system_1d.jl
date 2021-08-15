@@ -1,10 +1,10 @@
-struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSystem2D{1, 9} 
+struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSystem{1, 9} 
     vxr::RealT
-    #vyr::RealT
     theta_r::RealT
+    tau::RealT
   end
   
-  varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "vx", "theta")
+  varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "vx", "vy", "theta")
   varnames(::typeof(cons2cons), ::PerturbationMomentSystem1D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
   
   @inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem1D)
@@ -33,12 +33,9 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
 
     rho = w0 * rho_r
-    # print("rho=")
-    # println(rho)
     v_x = vxr + w0x * sqrt(theta_r) / w0
     #v_y = vyr + w0y * sqrt(theta_r) / w0
     theta = theta_r - (w0x^2 * theta_r)/(3 * w0^2) - (w0y^2 * theta_r)/(3 * w0^2) - (w1 * theta_r)/ w0
-    # println(theta)
     # sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r + (w0y^2 * theta_r * rho_r)/(3 * w0)
     # sigma_xy = 2 * w0xy * theta_r * rho_r - (w0x * w0y * theta_r * rho_r)/w0
     # sigma_yy = (w0x^2 * theta_r * rho_r)/(3 * w0) - (2*w0y^2*theta_r*rho_r)/(3*w0)+2*w0yy*theta_r*rho_r
@@ -81,7 +78,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
   @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-    tau  = calc_tau()
+    tau  = calc_tau(equations)
   
     du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
     du2 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
@@ -141,19 +138,19 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   end
   
-  function calc_tau()
-    Pr = 2/3
-    # gas constant for Xenon
-    R = 63.327
-    cp = 5/2 * R
-    # thermal conductivity for Xenon
-    lambda = 0.0055
+  function calc_tau(equations::PerturbationMomentSystem1D)
+    # Pr = 2/3
+    # # gas constant for Xenon
+    # R = 63.327
+    # cp = 5/2 * R
+    # # thermal conductivity for Xenon
+    # lambda = 0.0055
     
-    mu = Pr * lambda/cp
-    p = 41.3
+    # mu = Pr * lambda/cp
+    # p = 41.3
 
-    tau = mu/p
-    tau = 0.2
+    # tau = mu/p
+    @unpack tau = equations
     return(tau)
 
   end

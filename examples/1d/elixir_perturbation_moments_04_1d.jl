@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-equations = PerturbationMomentSystem1D(0.0, 1.0)
+equations = PerturbationMomentSystem1D(0.0, 1.0, 0.0)
 
 initial_condition = initial_condition_constant
 surface_flux = flux_lax_friedrichs
@@ -80,15 +80,16 @@ theta = [0.9999999999985604, 0.9999999999934237, 0.9999999999786398, 0.999999999
 
 
 #rho plot
-# plot(pd.x, pd.data[:,1], xlims = (-1.1,1.1), label = "DGSEM", title ="rho, t = 0.4", seriestype = :scatter, markersize=1)
-# plot!(x,rho, label = "FVV")
+plot(pd.x, pd.data[:,1], xlims = (-1.1,1.1), label = "DGSEM", title ="rho, t = 0.4", seriestype = :scatter, markersize=1)
+plot!(x,rho, label = "FVV")
+#savefig("rho.png")
 
 #vx plot
+plot(pd.x, pd.data[:,2], xlims = (-1.1,1.1), label = "DGSEM", title ="vx, t = 0.4", seriestype = :scatter, markersize=1)
+plot!(x,v, label = "FVV")
+#savefig("vx.png")
 
-# plot(pd.x, pd.data[:,2], xlims = (-1.1,1.1), label = "DGSEM", title ="vx, t = 0.4", seriestype = :scatter, markersize=1)
-# plot!(x,v, label = "FVV")
-
-# # #theta plot
-# plot(pd.x, pd.data[:,3], xlims = (-1.1,1.1), ylims = (0.5, 1.5), label = "DGSEM", title ="theta, t = 0.4", seriestype = :scatter, markersize=1)
-# plot!(x,theta, label = "FVV")
-
+#theta plot
+plot(pd.x, pd.data[:,3], xlims = (-1.1,1.1), ylims = (0.5, 1.5), label = "DGSEM", title ="theta, t = 0.4", seriestype = :scatter, markersize=1)
+plot!(x,theta, label = "FVV")
+#savefig("theta.png")

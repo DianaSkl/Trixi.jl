@@ -1,4 +1,4 @@
-struct AltPerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSystem2D{2, 9} 
+struct AltPerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSystem{2, 9} 
     vxr::RealT
     vyr::RealT
     theta_r::RealT
