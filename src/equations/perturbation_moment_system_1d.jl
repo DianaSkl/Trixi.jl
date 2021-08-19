@@ -155,6 +155,17 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
   end
   
+
+  function shocktube(x, equations::PerturbationMomentSystem1D)
+    rho_r = 1
+    if (x[1] < 0)
+      drho = 5 - rho_r
+    else
+      drho = 1 - rho_r
+    end
+    return drho
+  end
+
   function initial_condition_constant(x, t, equations::PerturbationMomentSystem1D)
  
     return SVector(init_w0(x, t, equations::PerturbationMomentSystem1D), 
@@ -172,11 +183,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   @inline function init_w0(x, t, equations::PerturbationMomentSystem1D)
    
     rho_r = 1
-    if (x[1] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
   
    
     w0 = 1 + drho / rho_r
@@ -190,11 +197,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
 
     rho_r = 1
-    if (x[1] <  0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
 
     dv_x = 0
     
@@ -207,11 +210,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] <  0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
     dv_y = 0
     
     w0y = dv_y / sqrt(theta_r) + (drho * dv_y)/(rho_r * sqrt(theta_r))
@@ -223,11 +222,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] <  0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
     dv_y = 0
     dv_x = 0
     dtheta = 0
@@ -243,11 +238,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
 
     rho_r = 1
-    if (x[1] <  0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
     dv_y = 0
     dv_x = 0
 
@@ -262,11 +253,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
     dv_y = 0
     dv_x = 0
     sigma_yy = 0
@@ -281,11 +268,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
     dv_y = 0
     dv_x = 0
     sigma_xy = 0
@@ -302,11 +285,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     
     @unpack theta_r = equations 
     rho_r = 1
-    if (x[1] < 0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
     dv_y = 0
     dv_x = 0
     sigma_xy = 0
@@ -328,11 +307,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     @unpack theta_r = equations 
     dtheta = 0
     rho_r = 1
-    if (x[1] <  0)
-      drho = 3 - rho_r
-    else
-      drho = 1 - rho_r
-    end
+    drho = shocktube(x, equations)
     dv_y = 0
     dv_x = 0
     sigma_xy = 0

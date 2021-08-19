@@ -25,7 +25,7 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1,)
 coordinates_max = ( 1,)
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=9, n_cells_max=10_000, periodicity=false)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=8, n_cells_max=10_000, periodicity=false)
 #semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions)
 

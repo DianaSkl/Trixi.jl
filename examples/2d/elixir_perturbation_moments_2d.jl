@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-equations = PerturbationMomentSystem2D(0.0, 0.0, 1.0)
+equations = PerturbationMomentSystem2D(0.0, 0.0, 1.0, 0.0)
 
 initial_condition = initial_condition_constant
 surface_flux = flux_lax_friedrichs
@@ -24,7 +24,7 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1, -1)
 coordinates_max = ( 1, 1)
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=8, n_cells_max=100_000, periodicity=false)
 
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions)
 
@@ -82,15 +82,15 @@ theta1d = [0.9979453157277856, 0.9976474477442324, 0.9973442327871961, 0.9970196
 
 #rho plot
 plot(pd.x, pd.data[:,1], xlims = (-1.1,1.1), label = "2D", title ="rho, t = 0.4")
-plot!(pd.x, rho1d, label = "1D")
-savefig("rho.png")
+# plot!(pd.x, rho1d, label = "1D")
+# savefig("rho.png")
 
-#vx plot
-plot(pd.x, pd.data[:,2], xlims = (-1.1,1.1), label = "2D", title ="vx, t = 0.4")
-plot!(pd.x, vx1d, label = "1D")
-savefig("vx.png")
+# #vx plot
+# plot(pd.x, pd.data[:,2], xlims = (-1.1,1.1), label = "2D", title ="vx, t = 0.4")
+# plot!(pd.x, vx1d, label = "1D")
+# savefig("vx.png")
 
-#theta plot
-plot(pd.x, pd.data[:,3], xlims = (-1.1,1.1), ylims = (0.5, 1.5), label = "2D", title ="theta, t = 0.4")
-plot!(pd.x, theta1d, label = "1D")
-savefig("theta.png")
+# #theta plot
+# plot(pd.x, pd.data[:,3], xlims = (-1.1,1.1), ylims = (0.5, 1.5), label = "2D", title ="theta, t = 0.4")
+# plot!(pd.x, theta1d, label = "1D")
+# savefig("theta.png")
