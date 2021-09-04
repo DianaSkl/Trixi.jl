@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-tau = 0.1
+tau = 0.4
 equations = PerturbationMomentSystem2D(0.0, 0.0, 1.0, tau)
 
 initial_condition = initial_condition_constant
