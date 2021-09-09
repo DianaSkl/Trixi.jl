@@ -31,10 +31,21 @@ varnames(::typeof(cons2prim), ::CompressibleEulerEquations1D) = ("rho", "v1", "p
 
 A constant initial condition to test free-stream preservation.
 """
+# function initial_condition_constant(x, t, equations::CompressibleEulerEquations1D)
+#   rho = 1.0
+#   rho_v1 = 0.1
+#   rho_e = 10.0
+#   return SVector(rho, rho_v1, rho_e)
+# end
+
 function initial_condition_constant(x, t, equations::CompressibleEulerEquations1D)
-  rho = 1.0
-  rho_v1 = 0.1
-  rho_e = 10.0
+  if (x[1] < 0)
+    rho = 3.0 
+  else
+    rho = 1.0
+  end
+  rho_v1 = 0.0
+  rho_e = 3.0 * rho / 2.0
   return SVector(rho, rho_v1, rho_e)
 end
 
@@ -93,8 +104,10 @@ Source terms used for convergence tests in combination with
   # du3 = (-(((4 * sin((t - x1) * ω) * A - 4c) + 1)) *
   #                          (γ - 1) * cos((t - x1) * ω) * A * ω) / 2
 
-  return SVector(du1, du2, du3)
+  #return SVector(du1, du2, du3)
+  return(0,0,0)
 end
+
 
 
 """
@@ -256,14 +269,25 @@ end
 
 
 # Calculate 1D flux for a single point
+# @inline function flux(u, orientation::Integer, equations::CompressibleEulerEquations1D)
+#   rho, rho_v1, rho_e = u
+#   v1 = rho_v1 / rho
+#   p = (equations.gamma - 1) * (rho_e - 0.5 * rho_v1 * v1)
+#   # Ignore orientation since it is always "1" in 1D
+#   f1 = rho_v1
+#   f2 = rho_v1 * v1 + p
+#   f3 = (rho_e + p) * v1
+#   return SVector(f1, f2, f3)
+# end
+
 @inline function flux(u, orientation::Integer, equations::CompressibleEulerEquations1D)
   rho, rho_v1, rho_e = u
   v1 = rho_v1 / rho
   p = (equations.gamma - 1) * (rho_e - 0.5 * rho_v1 * v1)
   # Ignore orientation since it is always "1" in 1D
   f1 = rho_v1
-  f2 = rho_v1 * v1 + p
-  f3 = (rho_e + p) * v1
+  f2 = rho_v1 * v1 + 2*rho_e/3 - rho_v1/3
+  f3 = (rho_e*5/3 - rho*v1^2/3 ) * v1
   return SVector(f1, f2, f3)
 end
 
@@ -430,6 +454,10 @@ end
   c_rr = sqrt(equations.gamma * p_rr / rho_rr)
 
   λ_max = max(v_mag_ll, v_mag_rr) + max(c_ll, c_rr)
+
+
+  d = sqrt(5.0/3.0)
+  return (d)
 end
 
 
@@ -527,13 +555,22 @@ end
 
 
 
+# @inline function max_abs_speeds(u, equations::CompressibleEulerEquations1D)
+#   rho, rho_v1, rho_e = u
+#   v1 = rho_v1 / rho
+#   p = (equations.gamma - 1) * (rho_e - 1/2 * rho * v1^2)
+#   c = sqrt(equations.gamma * p / rho)
+
+#   return (abs(v1) + c,)
+# end
+
 @inline function max_abs_speeds(u, equations::CompressibleEulerEquations1D)
   rho, rho_v1, rho_e = u
   v1 = rho_v1 / rho
   p = (equations.gamma - 1) * (rho_e - 1/2 * rho * v1^2)
   c = sqrt(equations.gamma * p / rho)
-
-  return (abs(v1) + c,)
+  d = sqrt(5.0/3.0)
+  return (d)
 end
 
 

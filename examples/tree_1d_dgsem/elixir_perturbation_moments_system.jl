@@ -25,7 +25,7 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1,)
 coordinates_max = ( 1,)
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=9, n_cells_max=10_000, periodicity=false)
 #semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions)
 
@@ -81,7 +81,7 @@ theta = [0.9999999999985604, 0.9999999999934237, 0.9999999999786398, 0.999999999
 
 #rho plot
 plot(pd.x, pd.data[:,1], xlims = (-1.1,1.1), label = "DGSEM", title ="rho, t = 0.4", seriestype = :scatter, markersize=1)
-#plot!(x,rho, label = "FVV")
+plot!(x,rho, label = "FVV")
 #savefig("rho.png")
 
 # #vx plot

@@ -2,14 +2,20 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-tau = 0.001
-equations = PerturbationMomentSystem1D(0.0, 1.0, tau)
+###############################################################################
+# semidiscretization of the compressible Euler equations
+#equations = EulerEquations1D(0.0)
+
+equations = CompressibleEulerEquations1D(1.4)
 
 initial_condition = initial_condition_constant
+
+
 surface_flux = flux_lax_friedrichs
 
 boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
+
 volume_flux  = flux_lax_friedrichs
 basis = LobattoLegendreBasis(3)
 shock_indicator_variable = density_pressure
@@ -22,13 +28,15 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_dg=volume_flux,
                                                  volume_flux_fv=surface_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
+
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=9, n_cells_max=10_000, periodicity=false)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=7, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 
-t = 0.2
+
+t = 0.4
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
@@ -47,27 +55,21 @@ alive_callback = AliveCallback(analysis_interval=analysis_interval)
 save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-#stepsize_callback = StepsizeCallback(cfl=0.9)
+stepsize_callback = StepsizeCallback(cfl=0.9)
 
 save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
 
 # Create a CallbackSet to collect all callbacks such that they can be passed to the ODE solver
-callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, save_solution, save_restart)
+callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, save_solution, stepsize_callback, save_restart)
 
 
 
 ###############################################################################
 # run the simulation
-
 sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
+summary_callback() # print the timer summary
 
-
-# Print the timer summary
-summary_callback()
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
-#rho plot
-plot(pd.x, pd.data[:,1], xlims = (-2.0, 2.0), label = "DGSEM mit amr", title ="rho, t = "*string(t)*", tau = "*string(tau)*", B ="*string(1/tau), seriestype = :scatter, markersize=1)
-
-
+plot(pd.x, pd.data[:,1])

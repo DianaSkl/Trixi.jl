@@ -81,10 +81,10 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     tau  = calc_tau(equations)
   
     du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-    du2 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-    du3 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+    du2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+    du3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
     du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-    du5 = 2.0 * w1 * w0y / 3.0  + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
+    du5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
       
     return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
 
