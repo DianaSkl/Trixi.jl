@@ -286,7 +286,7 @@ end
   p = (equations.gamma - 1) * (rho_e - 0.5 * rho_v1 * v1)
   # Ignore orientation since it is always "1" in 1D
   f1 = rho_v1
-  f2 = rho_v1 * v1 + 2*rho_e/3 - rho_v1/3
+  f2 = rho_v1 * v1 + 2*rho_e/3 - rho_v1 * v1/3
   f3 = (rho_e*5/3 - rho*v1^2/3 ) * v1
   return SVector(f1, f2, f3)
 end
@@ -456,7 +456,7 @@ end
   λ_max = max(v_mag_ll, v_mag_rr) + max(c_ll, c_rr)
 
 
-  d = sqrt(5.0/3.0)
+  d = 2.0 * sqrt(5.0/3.0)
   return (d)
 end
 
@@ -599,6 +599,7 @@ end
   w2 = rho_p * v1
   w3 = -rho_p
 
+
   return SVector(w1, w2, w3)
 end
 
@@ -648,7 +649,8 @@ end
 
 @inline function density_pressure(u, equations::CompressibleEulerEquations1D)
  rho, rho_v1, rho_e = u
- rho_times_p = (equations.gamma - 1) * (rho * rho_e - 0.5 * (rho_v1^2))
+ #rho_times_p = (equations.gamma - 1) * (rho * rho_e - 0.5 * (rho_v1^2))
+ rho_times_p = 1.0
  return rho_times_p
 end
 

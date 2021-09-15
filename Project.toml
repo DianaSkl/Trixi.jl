@@ -33,6 +33,7 @@ Triangulate = "f7e6ffb2-c36d-4f8f-a77e-16e897189344"
 TriplotBase = "981d1d27-644d-49a2-9326-4793e63143c3"
 TriplotRecipes = "808ab39a-a642-4abf-81ff-4cb34ebbffa3"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+VectorizationBase = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
 
 [compat]
 CodeTracking = "1.0.5"

@@ -29,14 +29,14 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_fv=surface_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
 
-coordinates_min = (-1.0,)
-coordinates_max = ( 1.0,)
+coordinates_min = (-0.2,)
+coordinates_max = ( 0.2,)
 
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=7, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 
 
-t = 0.4
+t = 0.3
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
