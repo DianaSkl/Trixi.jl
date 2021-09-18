@@ -2,9 +2,10 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-equations = PerturbationMomentSystem1D(0.0, 1.0, 0.0)
+equations = PerturbationMomentSystem1D(0.0, 1.0, 0.4)
 
-initial_condition = initial_condition_constant
+#initial_condition = initial_condition_constant
+initial_condition = initial_condition_convergence_test
 surface_flux = flux_lax_friedrichs
 
 boundary_condition = BoundaryConditionDirichlet(initial_condition)
@@ -25,9 +26,10 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1,)
 coordinates_max = ( 1,)
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=9, n_cells_max=10_000, periodicity=false)
-#semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
-semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
+
+#semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions)
+semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 
 tspan = (0.0, 0.4)
 ode = semidiscretize(semi, tspan)
@@ -81,7 +83,7 @@ theta = [0.9999999999985604, 0.9999999999934237, 0.9999999999786398, 0.999999999
 
 #rho plot
 plot(pd.x, pd.data[:,1], xlims = (-1.1,1.1), label = "DGSEM", title ="rho, t = 0.4", seriestype = :scatter, markersize=1)
-plot!(x,rho, label = "FVV")
+#plot!(x,rho, label = "FVV")
 #savefig("rho.png")
 
 # #vx plot
