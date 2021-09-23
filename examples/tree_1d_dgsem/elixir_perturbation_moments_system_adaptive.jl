@@ -16,10 +16,10 @@ basis = LobattoLegendreBasis(3)
 volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
 #solver = DGSEM(basis, surface_flux)
-coordinates_min = (-1.0,)
-coordinates_max = ( 1.0,)
+coordinates_min = (-30.0,)
+coordinates_max = ( 30.0,)
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=5, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 
 t = 0.4
@@ -65,9 +65,9 @@ pd = PlotData1D(sol; solution_variables=cons2prim)
 
 #rho plot
 #plot(pd.x, pd.data[:,1], xlims = (-1.0, 1.0), label = "DGSEM ad. ZV", title ="rho, t = "*string(t)*", tau = "*string(tau)*", B ="*string(1/tau), seriestype = :scatter, markersize=3)
-plot(pd.x, pd.data[:,1], xlims = (-1.0, 1.0), label = "DGSEM ad. ZV", title ="rho, t = "*string(t)*", tau = "*string(tau), seriestype = :scatter, markersize=3)
+plot(pd.x, pd.data[:,1], xlims = (-30.0, 30.0), label = "DGSEM ad. ZV", title ="rho, t = "*string(t)*", tau = "*string(tau), seriestype = :scatter, markersize=3)
 #plot!(pd.x, euler_rho1, label = "Euler", markersize=3)
-#savefig("euler-kin.png")
+#savefig("rho_periodisch.png")
 
 # plot(pd.x, pd.data[:,2], xlims = (-1.0, 1.0), label = "DGSEM ad. ZV", title ="vx, t = "*string(t)*", tau = "*string(tau), seriestype = :scatter, markersize=2)
 # plot!(x, vx, label = "FVV")

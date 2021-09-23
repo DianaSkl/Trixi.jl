@@ -130,18 +130,17 @@ sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
 summary_callback()
 
 
-pd = PlotData1D(sol; solution_variables=cons2prim)
+pd2 = PlotData1D(sol; solution_variables=cons2prim)
 pd3 = PlotData1D(sol; solution_variables=cons2cons)
-y = ones(3) 
 
 
 #rho plot
-plot!(pd.x, pd.data[:,1],label = "DGSEM ad. ZV 2D", markersize=3)
+plot!(pd2.x, pd2.data[:,1],label = "DGSEM ad. ZV 2D", markersize=3)
 
-savefig("1d_2d_yRichtung.png")
+# savefig("1d_2d_yRichtung.png")
 
 
 
-plot(pd3)
-savefig("ws.png")
+# plot(pd3)
+# savefig("ws.png")
 
