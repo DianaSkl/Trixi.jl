@@ -150,18 +150,18 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
   function shocktube(x, equations::PerturbationMomentSystem1D)
     rho_r = 1
-    # if (x[1] < 0)
-    #   drho = 3 - rho_r
-    # else
-    #   drho = 1 - rho_r
-    # end
-  
-
-    if (x[1] < -20 || (x[1]<0 && x[1]>=-10) || (x[1]>=10 && x[1]<20))
+    if (x[1] < 0)
       drho = 3 - rho_r
-    elseif ((x[1] < -10 && x[1] >= -20) || (x[1]>=0 && x[1] <10) || x[1] >= 20)
+    else
       drho = 1 - rho_r
     end
+  
+
+    # if (x[1] < -20 || (x[1]<0 && x[1]>=-10) || (x[1]>=10 && x[1]<20))
+    #   drho = 3 - rho_r
+    # elseif ((x[1] < -10 && x[1] >= -20) || (x[1]>=0 && x[1] <10) || x[1] >= 20)
+    #   drho = 1 - rho_r
+    # end
 
 
     return drho

@@ -36,15 +36,15 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
     else
   
-      # f1  = vyr * w0 + sqrt(theta_r) * w0y
-      # f2  = vyr * w0x + 2.0 * sqrt(theta_r) * w0xy
-      # f3  = vyr * w0y + sqrt(theta_r) * (w0 - w1 + 2.0 * w0yy)
-      # f4  = vyr * w1 + sqrt(theta_r) * (5.0 * w1y - 2.0 * w0y)/3.0
-      # f5  = vyr * w0xx + sqrt(theta_r) * (w1y - w0y)/3.0
-      # f6  = vyr * w0yy + sqrt(theta_r) * 2.0 * (w0y - w1y)/3.0
-      # f7  = vyr * w0xy + sqrt(theta_r)  * (w0x - w1x)/2.0
-      # f8  = vyr * w1x - sqrt(theta_r) * 4.0 * w0xy / 5.0
-      # f9  = vyr * w1y + sqrt(theta_r) * (w1 - 4.0 * w0yy / 5.0)
+      f1  = vyr * w0 + sqrt(theta_r) * w0y
+      f2  = vyr * w0x + 2.0 * sqrt(theta_r) * w0xy
+      f3  = vyr * w0y + sqrt(theta_r) * (w0 - w1 + 2.0 * w0yy)
+      f4  = vyr * w1 + sqrt(theta_r) * (5.0 * w1y - 2.0 * w0y)/3.0
+      f5  = vyr * w0xx + sqrt(theta_r) * (w1y - w0y)/3.0
+      f6  = vyr * w0yy + sqrt(theta_r) * 2.0 * (w0y - w1y)/3.0
+      f7  = vyr * w0xy + sqrt(theta_r)  * (w0x - w1x)/2.0
+      f8  = vyr * w1x - sqrt(theta_r) * 4.0 * w0xy / 5.0
+      f9  = vyr * w1y + sqrt(theta_r) * (w1 - 4.0 * w0yy / 5.0)
 
       f1 = 0
       f2 = 0
@@ -207,7 +207,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     rho_r = 1
 
     if (x[1] < -20 || (x[1]<0 && x[1]>=-10) || (x[1]>=10 && x[1]<20))
-      drho = 4 - rho_r
+      drho = 3 - rho_r
     elseif ((x[1] < -10 && x[1] >= -20) || (x[1]>=0 && x[1] <10) || x[1] >= 20)
       drho = 1 - rho_r
     end

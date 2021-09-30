@@ -62,12 +62,15 @@ sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
 summary_callback()
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
+pd2 = PlotData1D(sol; solution_variables=cons2cons)
+plot(pd2, xaxis = ("x"))
+savefig("ws_1d")
 
 #rho plot
 #plot(pd.x, pd.data[:,1], xlims = (-1.0, 1.0), label = "DGSEM ad. ZV", title ="rho, t = "*string(t)*", tau = "*string(tau)*", B ="*string(1/tau), seriestype = :scatter, markersize=3)
-plot(pd.x, pd.data[:,1], xlims = (-30.0, 30.0), label = "DGSEM ad. ZV", title ="rho, t = "*string(t)*", tau = "*string(tau), seriestype = :scatter, markersize=3)
+plot(pd.x, pd.data[:,1], xlims = (-30.0, 55.0), label = "DGSEM ad. ZV 1D", title ="rho, t = "*string(t)*", tau = "*string(tau), seriestype = :scatter, markersize=3)
 #plot!(pd.x, euler_rho1, label = "Euler", markersize=3)
-#savefig("rho_periodisch.png")
+savefig("periodisch_1d.png")
 
 # plot(pd.x, pd.data[:,2], xlims = (-1.0, 1.0), label = "DGSEM ad. ZV", title ="vx, t = "*string(t)*", tau = "*string(tau), seriestype = :scatter, markersize=2)
 # plot!(x, vx, label = "FVV")
