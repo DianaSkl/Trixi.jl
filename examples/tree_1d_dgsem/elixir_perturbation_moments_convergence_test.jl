@@ -1,3 +1,5 @@
+#Vergleich schwach/stark DG
+
 using OrdinaryDiffEq
 using Trixi
 using Plots

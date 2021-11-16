@@ -3,10 +3,10 @@ using Trixi
 using Plots
 
 ###############################################################################
-# semidiscretization of the compressible Euler equations
-#equations = EulerEquations1D(0.0)
 
-equations = CompressibleEulerEquations1D(1.4)
+#Achtung, erstmal den Source Term ändern!
+
+equations = EulerEquations1D(1.4)
 
 initial_condition = initial_condition_constant
 
@@ -27,6 +27,7 @@ indicator_sc = IndicatorHennemannGassner(equations, basis,
 volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_dg=volume_flux,
                                                  volume_flux_fv=surface_flux)
+volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 coordinates_min = (-1.0,)
@@ -136,6 +137,6 @@ summary_callback()
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
-plot!(pd.x, pd.data[:,1], label = "DGSEM ad. ZV", markersize=3)
+plot!(pd.x, pd.data[:,1], xlims = (-1.0, 1.0), label = "Momenten System", markersize=3)
 
-#savefig("euler-kin2.png")
+#savefig("euler-kin111.png")

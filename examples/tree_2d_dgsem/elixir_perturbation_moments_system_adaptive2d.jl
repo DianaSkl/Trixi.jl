@@ -135,7 +135,7 @@ pd3 = PlotData1D(sol; solution_variables=cons2cons)
 
 
 #rho plot
-plot!(pd2.x, pd2.data[:,1],label = "DGSEM ad. ZV 2D", markersize=3)
+#plot!(pd2.x, pd2.data[:,1],label = "DGSEM ad. ZV 2D", markersize=3)
 
 # savefig("1d_2d_yRichtung.png")
 

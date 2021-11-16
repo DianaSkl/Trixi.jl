@@ -164,7 +164,6 @@ end
 function find_assignment(expr, destination)
   # declare result to be able to assign to it in the closure
   local result
-
   # find explicit and keyword assignemnts
   walkexpr(expr) do x
     if x isa Expr
@@ -175,7 +174,7 @@ function find_assignment(expr, destination)
     end
     return x
   end
-
+ 
   result
 end
 
