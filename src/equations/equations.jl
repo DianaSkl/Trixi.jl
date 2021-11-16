@@ -288,6 +288,12 @@ abstract type AbstractCompressibleEulerEquations{NDIMS, NVARS} <: AbstractEquati
 include("compressible_euler_1d.jl")
 include("compressible_euler_2d.jl")
 include("compressible_euler_3d.jl")
+include("euler.jl")
+
+# PerturbationMoments
+abstract type AbstractPerturbationMomentSystem{NDIMS, NVARS} <: AbstractEquations{NDIMS, NVARS} end
+include("perturbation_1d.jl")
+include("perturbation_2d.jl")
 
 # CompressibleEulerMulticomponentEquations
 abstract type AbstractCompressibleEulerMulticomponentEquations{NDIMS, NVARS, NCOMP} <: AbstractEquations{NDIMS, NVARS} end
