@@ -223,7 +223,7 @@ end
 function extract_initial_resolution(elixir, kwargs)
   code = read(elixir, String)
   expr = Meta.parse("begin $code end")
-
+  
   try
     # get the initial_refinement_level from the elixir
     initial_refinement_level = find_assignment(expr, :initial_refinement_level)

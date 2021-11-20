@@ -19,7 +19,7 @@
     
     
     varnames(::typeof(cons2cons), ::EulerEquations1D) = ("rho", "rho_v1", "rho_e")
-    varnames(::typeof(cons2prim), ::EulerEquations1D) = ("rho", "v1", "p")
+    varnames(::typeof(cons2prim), ::EulerEquations1D) = ("rho", "v1", "t")
     
     
     """
@@ -60,9 +60,10 @@
       f = 1/L
       ω = 2 * pi * f
       ini = c + A * sin(ω * (x[1] - t))
+      v1 = 2
     
       rho = ini
-      rho_v1 = ini
+      rho_v1 = ini*v1
       rho_e = ini^2
     
       return SVector(rho, rho_v1, rho_e)
@@ -86,12 +87,12 @@
     
       x1, = x
     
-      si, co = sincos((t - x1)*ω)
-      tmp = (-((4 * si * A - 4c) + 1) * (γ - 1) * co * A * ω) / 2
+      si, co = sincos((x1-t)*ω)
+      #tmp = (-((4 * si * A - 4c) + 1) * (γ - 1) * co * A * ω) / 2
     
-      du1 = zero(eltype(u))
-      du2 = tmp
-      du3 = tmp
+      du1 = A * ω * co
+      du2 = (pi*co*si + 30*pi*co)/75
+      du3 = (7*pi*co*si + 100*pi*co)/150
     
       # Original terms (without performanc enhancements)
       # du1 = 0
@@ -100,8 +101,8 @@
       # du3 = (-(((4 * sin((t - x1) * ω) * A - 4c) + 1)) *
       #                          (γ - 1) * cos((t - x1) * ω) * A * ω) / 2
     
-      #return SVector(du1, du2, du3)
-      return(0,0,0)
+      return SVector(du1, du2, du3)
+      #return(0,0,0)
     end
     
     
@@ -436,22 +437,22 @@
     # Calculate maximum wave speed for local Lax-Friedrichs-type dissipation as the
     # maximum velocity magnitude plus the maximum speed of sound
     @inline function max_abs_speed_naive(u_ll, u_rr, orientation::Integer, equations::EulerEquations1D)
-      rho_ll, rho_v1_ll, rho_e_ll = u_ll
-      rho_rr, rho_v1_rr, rho_e_rr = u_rr
+      # rho_ll, rho_v1_ll, rho_e_ll = u_ll
+      # rho_rr, rho_v1_rr, rho_e_rr = u_rr
     
-      # Calculate primitive variables and speed of sound
-      v1_ll = rho_v1_ll / rho_ll
-      v_mag_ll = abs(v1_ll)
-      p_ll = (equations.gamma - 1) * (rho_e_ll - 1/2 * rho_ll * v_mag_ll^2)
-      c_ll = sqrt(equations.gamma * p_ll / rho_ll)
-      v1_rr = rho_v1_rr / rho_rr
-      v_mag_rr = abs(v1_rr)
-      p_rr = (equations.gamma - 1) * (rho_e_rr - 1/2 * rho_rr * v_mag_rr^2)
-      c_rr = sqrt(equations.gamma * p_rr / rho_rr)
+      # # Calculate primitive variables and speed of sound
+      # v1_ll = rho_v1_ll / rho_ll
+      # v_mag_ll = abs(v1_ll)
+      # p_ll = (equations.gamma - 1) * (rho_e_ll - 1/2 * rho_ll * v_mag_ll^2)
+      # c_ll = sqrt(equations.gamma * p_ll / rho_ll)
+      # v1_rr = rho_v1_rr / rho_rr
+      # v_mag_rr = abs(v1_rr)
+      # p_rr = (equations.gamma - 1) * (rho_e_rr - 1/2 * rho_rr * v_mag_rr^2)
+      # c_rr = sqrt(equations.gamma * p_rr / rho_rr)
     
-      λ_max = max(v_mag_ll, v_mag_rr) + max(c_ll, c_rr)
+      # λ_max = max(v_mag_ll, v_mag_rr) + max(c_ll, c_rr)
     
-    
+      
       d = 2.0 * sqrt(5.0/3.0)
       return (d)
     end
@@ -565,6 +566,7 @@
       v1 = rho_v1 / rho
       p = (equations.gamma - 1) * (rho_e - 1/2 * rho * v1^2)
       c = sqrt(equations.gamma * p / rho)
+      
       d = sqrt(5.0/3.0)
       return (d)
     end
@@ -575,9 +577,9 @@
       rho, rho_v1, rho_e = u
     
       v1 = rho_v1 / rho
-      p = (equations.gamma - 1) * (rho_e - 0.5 * rho_v1 * v1)
-    
-      return SVector(rho, v1, p)
+      rho_t = 2 * rho_e/3 - rho_v1*v1 /3
+      t = rho_t/rho
+      return SVector(rho, v1, t)
     end
     
     
@@ -585,18 +587,19 @@
     @inline function cons2entropy(u, equations::EulerEquations1D)
       rho, rho_v1, rho_e = u
     
-      v1 = rho_v1 / rho
-      v_square = v1^2
-      p = (equations.gamma - 1) * (rho_e - 0.5 * rho * v_square)
-      s = log(p) - equations.gamma*log(rho)
-      rho_p = rho / p
+      # v1 = rho_v1 / rho
+      # v_square = v1^2
+      # p = (equations.gamma - 1) * (rho_e - 0.5 * rho * v_square)
+      # s = log(p) - equations.gamma*log(rho)
+      # rho_p = rho / p
     
-      w1 = (equations.gamma - s) * equations.inv_gamma_minus_one - 0.5 * rho_p * v_square
-      w2 = rho_p * v1
-      w3 = -rho_p
+      # w1 = (equations.gamma - s) * equations.inv_gamma_minus_one - 0.5 * rho_p * v_square
+      # w2 = rho_p * v1
+      # w3 = -rho_p
     
     
-      return SVector(w1, w2, w3)
+      #return SVector(w1, w2, w3)
+      return SVector(0,0,0)
     end
     
     @inline function entropy2cons(w, equations::EulerEquations1D)
