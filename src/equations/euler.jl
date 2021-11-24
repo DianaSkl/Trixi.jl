@@ -565,7 +565,7 @@
       rho, rho_v1, rho_e = u
       v1 = rho_v1 / rho
       p = (equations.gamma - 1) * (rho_e - 1/2 * rho * v1^2)
-      c = sqrt(equations.gamma * p / rho)
+      #c = sqrt(equations.gamma * p / rho)
       
       d = sqrt(5.0/3.0)
       return (d)
@@ -660,8 +660,8 @@
       p = (equations.gamma - 1) * (cons[3] - 1/2 * (cons[2]^2) / cons[1])
     
       # Thermodynamic entropy
-      s = log(p) - equations.gamma*log(cons[1])
-    
+      #s = log(p) - equations.gamma*log(cons[1])
+      s = equations.gamma*log(cons[1])
       return s
     end
     

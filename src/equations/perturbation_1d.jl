@@ -9,6 +9,8 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   @inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem1D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
+
+  
     @unpack vxr, theta_r = equations
  
 
@@ -32,9 +34,8 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   
     rho_r = 2.0
-  
     vyr = 0.0
-    
+
     
     rho = w0 * rho_r
     v_x = vxr + w0x * sqrt(theta_r) / w0
@@ -55,7 +56,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   @inline function cons2entropy(u, equations::PerturbationMomentSystem1D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
   
-    return SVector( w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
+    return SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
   end
   
   @inline function max_abs_speed_naive(u_ll, u_rr, orientation::Integer, equations::PerturbationMomentSystem1D)
@@ -72,7 +73,31 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     return ab1
   end
 
+  #  # Calculate mathematical entropy for a conservative state `cons`
+  #  @inline function entropy_math(cons, equations::PerturbationMomentSystem1D)
+  #   # Mathematical entropy
+  #   S = -entropy_thermodynamic(cons, equations) * cons[1] 
+  
+  #   return S
+  # end
 
+  # @inline entropy(cons, equations::PerturbationMomentSystem1D) = entropy_math(cons, equations)
+
+  # @inline function entropy_thermodynamic(cons, equations::PerturbationMomentSystem1D)
+  #   # Pressure
+  #   #p = (equations.gamma - 1) * (cons[3] - 1/2 * (cons[2]^2) / cons[1])
+  
+  #   # Thermodynamic entropy
+  #   #s = log(p) - equations.gamma*log(cons[1])
+  #   #s = equations.gamma*log(cons[1])
+  #   s = 0
+  #   return s
+  # end
+
+  # @inline energy_total(cons, ::PerturbationMomentSystem1D) = cons[3]
+
+
+    
 
   # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
   #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
@@ -102,39 +127,45 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     tau = calc_tau(equations)
 
     si, co = sincos((t-x1)*ω)
- 
-    # du1 = stheta * dwx0
-    # du2 = stheta * (dw0 - dw1 + 2 * dwxx0)
-    # du4 = stheta * (5.0 * dwx1 - 2.0 * dwx0)/3.0
-    # du5 = stheta * 2.0 * (dwx0 - dwx1)/3.0 - (w0*w0xx + (w0x^2)/3)/tau 
-    # du6 = stheta * (dwx1 - dwx0)/3.0 - (w0x^2) /(tau*6)
-    # du7 = 0 
-    # du8 = stheta * (dw1 - 4.0 * dwxx0/5.0) - (2*w0*w1x/3 + 2*w0x*w1/3 + 4*w0xx*w0x/15)/tau 
-    # du9 = 0 
-
+    
+     
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u 
+   
+    # du1 = ω *co/20
+    # du2 = - (4657*sqrt(2)*ω*co*si-3145*sqrt(512)*ω*co)/(50000*sqrt(3))
+    # du3 = 0
+    # du4 = (5407* ω *co*si-54695*ω*co)/75000
+    # du5 = -(5407*ω*co*si-58445*ω*co)/187500 + (- w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0)/tau
+    # du6 = (5407*ω*co*si-58445*ω*co)/375000 + (- w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0)/tau
+    # du7 = (-w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0)/tau
+    # du8 = (5407*sqrt(2)*ω*co*si-53445*sqrt(2)*ω*co)/(125000*sqrt(3)) + (2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0)/tau
+    # du9 = (2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0)/tau
 
     du1 = ω *co/20
     du2 = - (4657*sqrt(2)*ω*co*si-3145*sqrt(512)*ω*co)/(50000*sqrt(3))
     du3 = 0
     du4 = (5407* ω *co*si-54695*ω*co)/75000
-    du5 = -(5407*ω*co*si-58445*ω*co)/75000 + (- w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0)/tau
-    du6 = (5407*ω*co*si-58445*ω*co)/375000 + (- w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0)/tau
-    du7 = (-w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0)/tau
-    du8 = (5407*sqrt(2)*ω*co*si-53445*sqrt(2)*ω*co)/(125000*sqrt(3)) + (2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0)/tau
-    du9 = (2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0)/tau
+    du5 = -(5407*ω*co*si-58445*ω*co)/187500 
+    du6 = (5407*ω*co*si-58445*ω*co)/375000 
+    du7 = 0
+    du8 = (5407*sqrt(2)*ω*co*si-53445*sqrt(2)*ω*co)/(125000*sqrt(3))
+    du9 = 0 
 
+
+
+ 
     return(du1, du2, du3, du4, du5, du6, du7, du8, du9)
   end 
   
   function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem1D)
+    
     c = 2
     A = 0.1
     L = 2
     f = 1/L
     ω = 2 * pi * f
     x1, = x
-    ini = c + A * sin(ω * (x1 - t))
+    ini = c + A * sin(ω * (x[1] - t))
 
 
     rho = ini
@@ -147,7 +178,8 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     theta_r = 2/3
     dtheta = theta - theta_r
     R = 8.314
-    sigma_xx = 2 * R * (ini^2 - 2 * ini)/3
+    #sigma_xx = 2 * R * (ini^2 - 2 * ini)/3
+    sigma_xx = rho * R * theta
     sigma_xy = 0
     q_x = dtheta 
 
@@ -156,7 +188,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     w0y = 0
     w1 = - (dtheta * rho)/(rho_r * theta_r) - rho*dv_x^2/(3 * rho_r * theta_r) 
     w0xx = (sigma_xx +drho * dv_x^2 * 2 /3)/(2 * rho_r * theta_r)+(dv_x^2 * 2 /3)/(2 * theta_r)
-    w0yy = -(rho * dv_x^2 * 1 /3)/(2 * theta_r * rho_r);
+    w0yy = -(rho * dv_x^2 /3)/(2 * theta_r * rho_r);
     w0xy = 0
     w1x = -2*(q_x + sigma_xx * dv_x)/(5 * rho_r*sqrt(theta_r^3)) - (dtheta*dv_x*rho)/(rho_r*sqrt(theta_r^3))- (rho*dv_x^3)/(5*sqrt(theta_r^3)*rho_r)
     w1y = 0

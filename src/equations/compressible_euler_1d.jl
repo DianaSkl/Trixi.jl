@@ -74,6 +74,7 @@ function initial_condition_convergence_test(x, t, equations::CompressibleEulerEq
   ω = 2 * pi * f
   ini = c + A * sin(ω * (x[1] - t))
 
+  
   rho = ini
   rho_v1 = ini
   rho_e = ini^2

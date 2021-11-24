@@ -12,7 +12,7 @@ initial_condition = initial_condition_convergence_test
 solver = DGSEM(polydeg=3, surface_flux=flux_hllc,
                volume_integral=VolumeIntegralPureLGLFiniteVolume(flux_hllc))
 
-coordinates_min = 0.0
+oordinates_min = 0.0
 coordinates_max = 2.0
 mesh = TreeMesh(coordinates_min, coordinates_max,
                 initial_refinement_level=4,
@@ -58,3 +58,7 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
             save_everystep=false, callback=callbacks);
 summary_callback() # print the timer summary
+
+pd = PlotData1D(sol; solution_variables=cons2prim)
+#plot!(pd.x, pd.data[:,1], xlims = (coordinates_min, coordinates_max),title ="Euler")
+plot(pd)
