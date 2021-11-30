@@ -99,10 +99,10 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     dtheta = theta - theta_r
     R = 8.314
     
-    sigma_xx = theta*R*rho
+    sigma_xx = R*2/3
     sigma_xy = 0
     sigma_yy = 0
-    q_x = ω*cos((x1-t)*ω)*A*2/3
+    q_x = 1.5
     q_y = 0
 
     w0 = rho/rho_r
@@ -152,28 +152,29 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
    
 
     
-    # mit Produktionen
-    du1 = (ω*cos((x1-z)*ω))/144115188075855872
-    du2 = (9314*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+162995*ω*cos((x1-z)*ω))/(3125*2^(9/2)*sqrt(3))
-    du3 = 0
-    du4 = -((83826*ω*cos((x1-z)*ω)-50000*ω^2)*sin((x1-z)*ω)+1466955*ω*cos((x1-z)*ω))/1500000
-    du5 = -((343782*ω*cos((x1-z)*ω)+400000*ω^2)*sin((x1-z)*ω)+6344235*ω*cos((x1-z)*ω))/30000000 + (- w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0)/tau
-    du6 = -((389304*ω*cos((x1-z)*ω)-200000*ω^2)*sin((x1-z)*ω)+6648795*ω*cos((x1-z)*ω))/30000000 + (- w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0)/tau
-    du7 = (-w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0)/tau
-    du8 = ((232501*2^(5/2)*ω*cos((x1-z)*ω)-84375*2^(11/2)*ω^2)*sin((x1-z)*ω)+13031295*sqrt(2)*ω*cos((x1-z)*ω))/(100000000*sqrt(3)) + (2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0)/tau
-    du9 = (2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0)/tau
 
-    # ohne 
-    # du1 = (ω*cos((x1-z)*ω))/144115188075855872
-    # du2 = (9314*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+162995*ω*cos((x1-z)*ω))/(3125*2^(9/2)*sqrt(3))
-    # du3 = 0
-    # du4 = -((83826*ω*cos((x1-z)*ω)-50000*ω^2)*sin((x1-z)*ω)+1466955*ω*cos((x1-z)*ω))/1500000
-    # du5 = -((343782*ω*cos((x1-z)*ω)+400000*ω^2)*sin((x1-z)*ω)+6344235*ω*cos((x1-z)*ω))/30000000
-    # du6 = -((389304*ω*cos((x1-z)*ω)-200000*ω^2)*sin((x1-z)*ω)+6648795*ω*cos((x1-z)*ω))/30000000
-    # du7 = 0
-    # du8 = ((232501*2^(5/2)*ω*cos((x1-z)*ω)-84375*2^(11/2)*ω^2)*sin((x1-z)*ω)+13031295*sqrt(2)*ω*cos((x1-z)*ω))/(100000000*sqrt(3))
-    # du9 = 0
+    # mit Produktionen 
+    du1 = (ω*cos((x1-z)*ω))/144115188075855872
+    du2 = (2*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+35*ω*cos((x1-z)*ω))/(25*2^(5/2)*sqrt(3))
+    du3 = 0
+    du4 = -(6*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+105*ω*cos((x1-z)*ω))/1000
+    du5 = (1200*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+18813*ω*cos((x1-z)*ω))/200000 + (- w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0)/tau
+    du6 = -(1200*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+18813*ω*cos((x1-z)*ω))/400000 + (- w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0)/tau
+    du7 = (-w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0)/tau
+    du8 = (1075*2^(7/2)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+20749*sqrt(2)*ω*cos((x1-z)*ω))/(4000000*sqrt(3)) + (2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0)/tau
+    du9 = (2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0)/tau
     
+    # ohne
+
+    # du1 = (ω*cos((x1-z)*ω))/144115188075855872
+    # du2 = (2*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+35*ω*cos((x1-z)*ω))/(25*2^(5/2)*sqrt(3))
+    # du3 = 0
+    # du4 = -(6*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+105*ω*cos((x1-z)*ω))/1000
+    # du5 = (1200*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+18813*ω*cos((x1-z)*ω))/200000
+    # du6 = -(1200*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+18813*ω*cos((x1-z)*ω))/400000
+    # du7 = 0
+    # du8 = (1075*2^(7/2)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+20749*sqrt(2)*ω*cos((x1-z)*ω))/(4000000*sqrt(3))
+    # du9 = 0
 
     return(du1,du2,du3,du4,du5,du6,du7,du8,du9)
   end 

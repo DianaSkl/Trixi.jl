@@ -21,7 +21,7 @@ boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 # volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 # solver = DGSEM(basis, surface_flux, volume_integral)
 
-solver = DGSEM(polydeg=2, surface_flux=flux_lax_friedrichs)
+solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
 
 coordinates_min = 0
