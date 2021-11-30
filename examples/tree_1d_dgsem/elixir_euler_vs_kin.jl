@@ -18,15 +18,6 @@ boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
 volume_flux  = flux_lax_friedrichs
 basis = LobattoLegendreBasis(3)
-shock_indicator_variable = density_pressure
-indicator_sc = IndicatorHennemannGassner(equations, basis,
-                                         alpha_max=0.5,
-                                         alpha_min=0.001,
-                                         alpha_smooth=true,
-                                         variable=shock_indicator_variable)
-volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
-                                                 volume_flux_dg=volume_flux,
-                                                 volume_flux_fv=surface_flux)
 volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
 
@@ -137,6 +128,6 @@ summary_callback()
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
-plot!(pd.x, pd.data[:,1], xlims = (-1.0, 1.0), label = "Momenten System", markersize=3)
+plot!(pd.x, pd.data[:,2], xlims = (-1.0, 1.0), label = "Momenten System", markersize=3)
 
 #savefig("euler-kin111.png")
