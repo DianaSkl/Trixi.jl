@@ -4,7 +4,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     tau::RealT
   end
   
-  varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "vx", "vy", "theta")
+  varnames(::typeof(cons2prim), ::PerturbationMomentSystem1D) = ("rho", "vx", "theta")
   varnames(::typeof(cons2cons), ::PerturbationMomentSystem1D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
   
   @inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem1D)
@@ -49,7 +49,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     # q_y = - (2*w0x * w0xy * sqrt(theta_r)^3*rho_r)/w0 + (w0x^2 * w0y * sqrt(theta_r)^3 * rho_r)/w0^2 + (w0y^3*sqrt(theta_r)^3 * rho_r)/w0^2 - (2*w0y *w0yy* sqrt(theta_r)^3 * rho_r)/w0 + (5*w0y*w1*sqrt(theta_r)^3*rho_r)/2*w0 - (5*w1y*sqrt(theta_r)^3*rho_r)/2
 
     
-    return SVector(rho, v_x, v_y, theta)
+    return SVector(rho, v_x, theta)
   end
 
   
@@ -164,15 +164,15 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     du9 = (2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0)/tau
 
     # ohne 
-    # du1 = (ω*cos((x1-z)*ω))/144115188075855872
-    # du2 = (9314*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+162995*ω*cos((x1-z)*ω))/(3125*2^(9/2)*sqrt(3))
-    # du3 = 0
-    # du4 = -((83826*ω*cos((x1-z)*ω)-50000*ω^2)*sin((x1-z)*ω)+1466955*ω*cos((x1-z)*ω))/1500000
-    # du5 = -((343782*ω*cos((x1-z)*ω)+400000*ω^2)*sin((x1-z)*ω)+6344235*ω*cos((x1-z)*ω))/30000000
-    # du6 = -((389304*ω*cos((x1-z)*ω)-200000*ω^2)*sin((x1-z)*ω)+6648795*ω*cos((x1-z)*ω))/30000000
-    # du7 = 0
-    # du8 = ((232501*2^(5/2)*ω*cos((x1-z)*ω)-84375*2^(11/2)*ω^2)*sin((x1-z)*ω)+13031295*sqrt(2)*ω*cos((x1-z)*ω))/(100000000*sqrt(3))
-    # du9 = 0
+    du1 = (ω*cos((x1-z)*ω))/144115188075855872
+    du2 = (9314*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+162995*ω*cos((x1-z)*ω))/(3125*2^(9/2)*sqrt(3))
+    du3 = 0
+    du4 = -((83826*ω*cos((x1-z)*ω)-50000*ω^2)*sin((x1-z)*ω)+1466955*ω*cos((x1-z)*ω))/1500000
+    du5 = -((343782*ω*cos((x1-z)*ω)+400000*ω^2)*sin((x1-z)*ω)+6344235*ω*cos((x1-z)*ω))/30000000
+    du6 = -((389304*ω*cos((x1-z)*ω)-200000*ω^2)*sin((x1-z)*ω)+6648795*ω*cos((x1-z)*ω))/30000000
+    du7 = 0
+    du8 = ((232501*2^(5/2)*ω*cos((x1-z)*ω)-84375*2^(11/2)*ω^2)*sin((x1-z)*ω)+13031295*sqrt(2)*ω*cos((x1-z)*ω))/(100000000*sqrt(3))
+    du9 = 0
     
 
     return(du1,du2,du3,du4,du5,du6,du7,du8,du9)

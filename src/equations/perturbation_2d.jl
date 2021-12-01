@@ -22,17 +22,6 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
       f7  = vxr * w0xy + sqrt(theta_r) * (w0y - w1y)/2.0
       f8  = vxr * w1x + sqrt(theta_r) * (w1 - 4.0 * w0xx/5.0)
       f9  = vxr * w1y - 4.0 * sqrt(theta_r) * w0xy / 5.0
-
-      # f1 = 0
-      # f2 = 0
-      # f3 = 0
-      # f4 = 0
-      # f5 = 0
-      # f6 = 0
-      # f7 = 0
-      # f8 = 0
-      # f9 = 0
-
   
     else
   
@@ -45,16 +34,6 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
       f7  = vyr * w0xy + sqrt(theta_r)  * (w0x - w1x)/2.0
       f8  = vyr * w1x - sqrt(theta_r) * 4.0 * w0xy / 5.0
       f9  = vyr * w1y + sqrt(theta_r) * (w1 - 4.0 * w0yy / 5.0)
-
-      f1 = 0
-      f2 = 0
-      f3 = 0
-      f4 = 0
-      f5 = 0
-      f6 = 0
-      f7 = 0
-      f8 = 0
-      f9 = 0
 
     end
     
@@ -117,82 +96,79 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
   #source function for all source terms to be 0:
 
-  @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem2D)
-    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-    tau  = calc_tau(equations)
-  
-    du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-    du2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-    du3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-    du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-    du5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
-  
-  
-    return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
-  end
-
-
   # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem2D)
+  #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
+  #   tau  = calc_tau(equations)
+  
+  #   du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
+  #   du2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+  #   du3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
+  #   du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
+  #   du5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
+  
+  
+  #   return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
+  # end
+
+
+  @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem2D)
     
-  # @unpack vxr, vyr, theta_r = equations
+  @unpack vxr, vyr, theta_r, tau = equations
 
-  #   stheta = sqrt(theta_r)
-  #   tau = calc_tau()
-  #   v = 1
-  #   c = 2
-  #   A = 0.1
-  #   L = 2
-  #   J = 3
-  #   K = 6
-  #   D = 8
-  #   f = 1/L
-  #   g = 5/K
-  #   j = J/5
-  #   d = D/15
+    c = 2
+    A = 0.1
+    L = 2
+    f = 1/L
+    ω = 2 * pi * f
+    z = t
+    x1 = x[1]
+    x2 = x[2]
 
-  #   h = 1/tau
-  #   ω = 2 * pi * f
+ 
+   du1 = (ω*cos((-z+x2+x1)*ω))/20
+   
 
-  #   ini1 = c + A * sin(ω * (x[1] + x[2] - t))
-  #   ini2 = ini1^2
-
-  #   tmp1 = ω * A * cos(ω * (x[1] + x[2] - t))
-  #   tmp2 = vxr + vyr - v
-
-  #   du1 = tmp1 * (tmp2 + c * stheta)
-  #   du2 = tmp1 * (tmp2 + c * c * stheta)
-  #   #du3 = tmp1 * (tmp2 + c * c * stheta)
-  #   #du4 = tmp1 * (tmp2 + c * stehta)
-  #   du5 = tmp1 * tmp2 + h * g * ini2
-  #   du6 = tmp1 * tmp2 + h * f * ini2
-  #   #du7 = tmp1 * tmp2 + h * g * ini2
-  #   du8 = tmp1 * (tmp2 - j) - h * d * ini2
-  #   #du9 = tmp1 * (tmp2 - j) - h * d * ini2
+  
 
 
-  #   return SVector(du1, du2, du2, du1, du5, du6, du5, du8, du8)
-  # end 
+    return SVector(du1, du2, du2, du1, du5, du6, du5, du8, du8)
+  end 
   
   function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem2D)
     c = 2
     A = 0.1
     L = 2
-    K = 3
     f = 1/L
-    g = 1/K
     ω = 2 * pi * f
     ini = c + A * sin(ω * (x[1] + x[2] - t))
+ 
+    @unpack vxr,vyr, theta_r = equations
 
-    w0 = ini
-    w0x = ini
-    w0y = ini
-    w1 = ini
-    w0xx = ini
-    w0xy = ini
-    w0yy = ini
-    w1x = ini
-    w1y = ini
-  
+    rho = ini
+    rho_r = 2
+    drho = rho-rho_r
+    vx = 1
+    vy = 1
+    dvx = vx-vxr
+    dvy = vy-vyr
+    theta = 2*(ini-0.5)/3
+    dtheta = theta -  theta_r
+    sxx = theta*R*rho
+    syy = R*2/3
+    sxy = R*2/3
+    qx = ω*cos(ω*(x[1]+x[2]-t))*A*2/3
+    qy = 1.5
+
+
+    w0 = rho/rho_r
+    w0x = (rho * dv_x)/(rho_r * sqrt(theta_r))
+    w0y = (rho * dv_y)/(rho_r * sqrt(theta_r))
+    w1 = -dtheta*rho/(rho_r*theta_r) - (rho*(dvx^2 + dvy^2))/(3*rho_r*theta_r)
+    w0xx = (sxx+drho*(dvx^2*2/3 - dvy^2*1/3))/(2*rho_r*theta_r)+(dvx^2*2/3 - dvy^2*1/3)/(2*theta_r)
+    w0yy = syy/(2*rho_r*theta_r)+ (rho*(dvy^2 * 2/3 - dvx^2*1/3))/(2*theta_r*rho_r)
+    w0xy = sxy/(2*rho_r*theta_r) + (dvx*dvy/(2*theta_r)) + drho*dvx*dvy/(2*rho_r*theta_r)
+    w1x =  -2*(qx+ sxx*dvx + sxy*dvy )/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho)/(rho_r*sqrt(theta_r^3))- (rho*(dvx^3+dvx*dvy^2))/(5*sqrt(theta_r^3)*rho_r)
+    w1y =  -2*(qy+ sxy*dvx + syy*dvy )/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvy*rho)/(rho_r*sqrt(theta_r^3))- (rho*(dvy*dvx^2+dvy^3))/(5*sqrt(theta_r^3)*rho_r)
     return SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
   end
   

@@ -101,7 +101,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-t = 0.1
+t = 1.0
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 # At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
@@ -124,7 +124,7 @@ save_restart = SaveRestartCallback(interval=100,
 save_solution = SaveSolutionCallback(interval=100, solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-stepsize_callback = StepsizeCallback(cfl=0.01)
+stepsize_callback = StepsizeCallback(cfl=0.1)
 
 # Create a CallbackSet to collect all callbacks such that they can be passed to the ODE solver
 callbacks = CallbackSet(summary_callback,
@@ -147,6 +147,6 @@ summary_callback()
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
 
-#plot(pd.x, pd.data[:,3], xlims = (coordinates_min, coordinates_max), label = "Euler", markersize=3)
+plot!(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), label = "Euler", markersize=3)
 
-plot(pd)
+#plot!(pd, label = "Euler t = "*string(t))

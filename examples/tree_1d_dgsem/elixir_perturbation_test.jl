@@ -13,15 +13,7 @@ initial_condition = initial_condition_convergence_test
 boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
-
-# surface_flux = flux_lax_friedrichs
-# volume_flux  = flux_lax_friedrichs
-# basis = LobattoLegendreBasis(3)
-
-# volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
-# solver = DGSEM(basis, surface_flux, volume_integral)
-
-solver = DGSEM(polydeg=2, surface_flux=flux_lax_friedrichs)
+solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
 
 coordinates_min = 0
@@ -49,7 +41,7 @@ save_restart = SaveRestartCallback(interval=100, save_final_restart=true)
 save_solution = SaveSolutionCallback(interval=100, solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-stepsize_callback = StepsizeCallback(cfl=0.001)
+stepsize_callback = StepsizeCallback(cfl=0.1)
 
 callbacks = CallbackSet(summary_callback,analysis_callback, alive_callback, save_restart, save_solution, stepsize_callback)
 
@@ -64,5 +56,5 @@ summary_callback()
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
-#plot(pd.x, pd.data[:,4], xlims = (coordinates_min, coordinates_max), title ="rho", label = "Sol t = " *string(t), markersize=3)
-plot(pd)
+plot(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), title ="rho", label = "Sol t = " *string(t), markersize=3)
+#plot(pd, label = "Momentensys. t = "*string(t))
