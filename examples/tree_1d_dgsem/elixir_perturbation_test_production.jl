@@ -5,7 +5,7 @@ using Plots
 ###############################################################################
 # semidiscretization of the compressible Euler equations
 
-tau = 0.1
+tau = 100000000.0
 vxr = 0.1
 equations = PerturbationMomentSystem1D(vxr, 2/3, tau)
 initial_condition = initial_condition_convergence_test
@@ -61,3 +61,4 @@ summary_callback()
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
 plot(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), title ="rho", label = "MS t = " *string(t), markersize=3)
+

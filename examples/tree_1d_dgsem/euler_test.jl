@@ -147,6 +147,5 @@ summary_callback()
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
 
-#plot(pd.x, pd.data[:,3], xlims = (coordinates_min, coordinates_max), label = "Euler", markersize=3)
+plot!(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), label = "Euler t= "*string(t), markersize=3)
 
-plot(pd)
