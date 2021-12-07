@@ -13,6 +13,7 @@ initial_condition = initial_condition_convergence_test
 # Using flux_hll instead yields the expected EOC.
 solver = DGSEM(polydeg=4, surface_flux=flux_lax_friedrichs)
 
+
 coordinates_min = 0.0
 coordinates_max = 2.0
 mesh = TreeMesh(coordinates_min, coordinates_max,
@@ -21,7 +22,7 @@ mesh = TreeMesh(coordinates_min, coordinates_max,
 
 
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver,
-                                    source_terms=source_terms_convergence_test)
+                                    source_terms=source_terms_convergence_test, boundary_conditions = boundary_condition_periodic)
 
 
 ###############################################################################
@@ -59,3 +60,9 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
             save_everystep=false, callback=callbacks);
 summary_callback() # print the timer summary
+
+pd = PlotData1D(sol; solution_variables=cons2prim)
+
+
+
+plot(pd, size=(1000,500))

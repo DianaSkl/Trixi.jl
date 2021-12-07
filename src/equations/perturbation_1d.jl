@@ -76,6 +76,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
 
   function initial_condition_convergence_test(x, t, equations::PerturbationMomentSystem1D)
+    
     @unpack vxr = equations 
     c = 2
     A = 0.1
@@ -98,11 +99,11 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     theta_r = 2/3
     dtheta = theta - theta_r
     R = 8.314
-    
-    sigma_xx = theta*R*rho
+ 
+    sigma_xx = (ini-2)/100000
     sigma_xy = 0
     sigma_yy = 0
-    q_x = ω*cos((x1-t)*ω)*A*2/3
+    q_x = (ini-2)/100000
     q_y = 0
 
     w0 = rho/rho_r
@@ -110,7 +111,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     w0y = 0
     w1 = - (dtheta * rho)/(rho_r * theta_r) - rho*dv_x^2/(3 * rho_r * theta_r) 
     w0xx = (sigma_xx +drho * dv_x^2 * 2 /3)/(2 * rho_r * theta_r)+(dv_x^2 * 2 /3)/(2 * theta_r)
-    w0yy = -(rho * dv_x^2 /3)/(2 * theta_r * rho_r);
+    w0yy = -(rho * dv_x^2 /3)/(2 * theta_r * rho_r)
     w0xy = 0
     w1x =  - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x + sigma_xy * dv_y))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x * dv_y^2 + dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
     w1y =  - 2.0 * q_y / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xy * dv_x + sigma_yy * dv_y))/(5.0 * rho_r * sqrt(theta_r).^3.0) - (dtheta * dv_y * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_y * dv_x^2 + dv_y^3)/(5.0 * rho_r * sqrt(theta_r).^3.0) 
@@ -135,7 +136,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
 
   @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
     
-    vxr = 1
+    @unpack vxr = equations 
     x1, = x
     c = 2
     L = 2
@@ -145,52 +146,37 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     R = 8.314
     tau = calc_tau(equations)
     z = t
-   
-    
-     
-    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u 
-   
+      
+    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
 
-    
-    # mit Produktionen
-    du1 = (ω*cos((x1-z)*ω))/144115188075855872
-    du2 = (9314*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+162995*ω*cos((x1-z)*ω))/(3125*2^(9/2)*sqrt(3))
-    du3 = 0
-    du4 = -((83826*ω*cos((x1-z)*ω)-50000*ω^2)*sin((x1-z)*ω)+1466955*ω*cos((x1-z)*ω))/1500000
-    du5 = -((343782*ω*cos((x1-z)*ω)+400000*ω^2)*sin((x1-z)*ω)+6344235*ω*cos((x1-z)*ω))/30000000 + (- w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0)/tau
-    du6 = -((389304*ω*cos((x1-z)*ω)-200000*ω^2)*sin((x1-z)*ω)+6648795*ω*cos((x1-z)*ω))/30000000 + (- w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0)/tau
-    du7 = (-w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0)/tau
-    du8 = ((232501*2^(5/2)*ω*cos((x1-z)*ω)-84375*2^(11/2)*ω^2)*sin((x1-z)*ω)+13031295*sqrt(2)*ω*cos((x1-z)*ω))/(100000000*sqrt(3)) + (2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0)/tau
-    du9 = (2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0)/tau
+    a1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
+    a2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+    a3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
+    a4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
+    a5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
 
-    # ohne 
-    du1 = (ω*cos((x1-z)*ω))/144115188075855872
-    du2 = (9314*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+162995*ω*cos((x1-z)*ω))/(3125*2^(9/2)*sqrt(3))
+    #  a1 = 0
+    #  a2 = 0
+    #  a3 = 0
+    #  a4 = 0
+    #  a5 = 0
+
+    du1 = 0
+    du2 =(625*2^(13/2)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+700003*sqrt(2)*ω*cos((x1-z)*ω))/(4000000*sqrt(3))
     du3 = 0
-    du4 = -((83826*ω*cos((x1-z)*ω)-50000*ω^2)*sin((x1-z)*ω)+1466955*ω*cos((x1-z)*ω))/1500000
-    du5 = -((343782*ω*cos((x1-z)*ω)+400000*ω^2)*sin((x1-z)*ω)+6344235*ω*cos((x1-z)*ω))/30000000
-    du6 = -((389304*ω*cos((x1-z)*ω)-200000*ω^2)*sin((x1-z)*ω)+6648795*ω*cos((x1-z)*ω))/30000000
-    du7 = 0
-    du8 = ((232501*2^(5/2)*ω*cos((x1-z)*ω)-84375*2^(11/2)*ω^2)*sin((x1-z)*ω)+13031295*sqrt(2)*ω*cos((x1-z)*ω))/(100000000*sqrt(3))
-    du9 = 0
-    
+    du4 = ((40000*vxr-40000)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(700003*vxr-700006)*ω*cos((x1-z)*ω))/6000000
+    du5 = -((800000*vxr-800000)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(-1800000*vxr^3+5400000*vxr^2+8599979*vxr-12200003)*ω*cos((x1-z)*ω))/120000000 + a1/tau
+    du6 = ((100000*vxr-100000)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(-225000*vxr^3+675000*vxr^2+1075003*vxr-1525006)*ω*cos((x1-z)*ω))/30000000 + a2/tau
+    du7 = a3/tau 
+    du8 = ((9375*2^(11/2)*vxr^2-9375*2^(13/2)*vxr+3125*2^(11/2))*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(28125*2^(9/2)*vxr^4-28125*2^(13/2)*vxr^3+5550009*sqrt(2)*vxr^2-7500027*sqrt(2)*vxr+200003*2^(5/2))*ω*cos((x1-z)*ω))/(20000000*sqrt(3)) + a4/tau
+    du9 = a5/tau
+   
 
     return(du1,du2,du3,du4,du5,du6,du7,du8,du9)
   end 
   
 
   function calc_tau(equations::PerturbationMomentSystem1D)
-    # Pr = 2/3
-    # # gas constant for Xenon
-    # R = 63.327
-    # cp = 5/2 * R
-    # # thermal conductivity for Xenon
-    # lambda = 0.0055
-    
-    # mu = Pr * lambda/cp
-    # p = 41.3
-
-    # tau = mu/p
     @unpack tau = equations
 
     return(tau)
@@ -206,14 +192,6 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
       drho = 1 - rho_r
     end
   
-
-    # if (x[1] < -20 || (x[1]<0 && x[1]>=-10) || (x[1]>=10 && x[1]<20))
-    #   drho = 3 - rho_r
-    # elseif ((x[1] < -10 && x[1] >= -20) || (x[1]>=0 && x[1] <10) || x[1] >= 20)
-    #   drho = 1 - rho_r
-    # end
-
-
     return drho
   end
 
