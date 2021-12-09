@@ -22,7 +22,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-t = 0.5
+t = 0.1
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 summary_callback = SummaryCallback()
@@ -50,7 +50,7 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
 summary_callback()
 
 
-pd = PlotData1D(sol; solution_variables=cons2prim)
-plot(pd, size=(1000,500))
-#plot(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), title ="vx", label = "M t = " *string(t), markersize=3)
+pd3 = PlotData1D(sol; solution_variables=cons2prim)
+#plot(pd, size=(1000,500))
+plot(pd3.x, pd3.data[:,2], xlims = (coordinates_min, coordinates_max), title ="rho", label = "M t = " *string(t), markersize=3)
 #plot(pd, label = "Momentensys. t = "*string(t))
