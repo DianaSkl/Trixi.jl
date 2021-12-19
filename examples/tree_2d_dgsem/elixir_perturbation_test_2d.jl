@@ -4,15 +4,17 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-
-equations = EulerEquations2D(1.4)
+vxr = 0.9
+vyr = 0.1
+theta_r = 1/3
+tau = 0.2
+equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, tau)
 
 initial_condition = initial_condition_convergence_test
 
 
 
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
-
 
 min = 0.0
 max = 4.0
@@ -62,6 +64,7 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
             save_everystep=false, callback=callbacks);
 summary_callback() # print the timer summary
 
-pde = PlotData1D(sol; solution_variables=cons2prim)
-#plot(pd1.x, pd1.data[:,2], xlims = (min,max), label = "2D Euler t = " *string(t), title ="vx")
-plot(pde)
+pd = PlotData1D(sol; solution_variables=cons2prim)
+
+#plot(pd.x, pd.data[:,2], xlims = (min, max), label = "2D MS Produktionen = 0 ", title ="vx")
+plot(pd)
