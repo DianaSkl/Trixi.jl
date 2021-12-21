@@ -85,7 +85,9 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   @inline function cons2prim(u, equations::PerturbationMomentSystem2D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
     @unpack vxr, vyr, theta_r = equations
+
     rho_r = 0.5
+
     rho = w0 * rho_r
     v_x = vxr + w0x * sqrt(theta_r) / w0
     v_y = vyr + w0y * sqrt(theta_r) / w0
@@ -110,13 +112,12 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     dv_x = vx - vxr 
     dv_y = vy - vyr 
     dtheta = theta - theta_r
-    sigma_xx = 0.001
-    sigma_yy = 0.001
-    sigma_xy = 0.001
+    sigma_xx = 0.01
+    sigma_yy = 0.01
+    sigma_xy = 0.01
   
-  
-    q_x =  0.001
-    q_y =  0.001
+    q_x =  0.1
+    q_y =  0.1
   
   
     w0 = 1 + drho / rho_r
