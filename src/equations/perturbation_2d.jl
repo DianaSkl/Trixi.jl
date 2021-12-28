@@ -86,7 +86,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
     @unpack vxr, vyr, theta_r = equations
 
-    rho_r = 0.5
+    rho_r = 1.24
 
     rho = w0 * rho_r
     v_x = vxr + w0x * sqrt(theta_r) / w0
@@ -106,15 +106,15 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     rho, vx, vy, theta = u
     @unpack vxr, vyr, theta_r = equations
   
-    rho_r = 0.5
+    rho_r = 1.24
   
     drho = rho - rho_r
     dv_x = vx - vxr 
     dv_y = vy - vyr 
     dtheta = theta - theta_r
-    sigma_xx = 0.01
-    sigma_yy = 0.01
-    sigma_xy = 0.01
+    sigma_xx = 0.1
+    sigma_yy = 0.1
+    sigma_xy = 0.1
   
     q_x =  0.1
     q_y =  0.1
@@ -166,8 +166,14 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     rho, v_x, v_y, theta = cons2prim(u, equations)
     rho_times_p = theta * rho^2 
     return rho_times_p
-   end
+  end
   
+  @inline function density(u, equations::PerturbationMomentSystem2D)
+    a = cons2prim(u, equations)
+    rho = a[1]
+    return rho
+  end
+   
   
   @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem2D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u

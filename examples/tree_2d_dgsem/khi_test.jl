@@ -1,5 +1,6 @@
 using OrdinaryDiffEq
 using Trixi
+using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
@@ -54,7 +55,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 1.5)
+tspan = (0.0, 2.5)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -88,4 +89,4 @@ summary_callback() # print the timer summary
 
 pdkh1 = PlotData1D(sol; solution_variables=cons2prim)
 pdkh2 = PlotData2D(sol; solution_variables=cons2prim)
-plot(pdkh2)
+plot!(pdkh1)
