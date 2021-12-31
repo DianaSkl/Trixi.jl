@@ -112,12 +112,12 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     dv_x = vx - vxr 
     dv_y = vy - vyr 
     dtheta = theta - theta_r
-    sigma_xx = 0.1
-    sigma_yy = 0.1
-    sigma_xy = 0.1
+    sigma_xx = 0
+    sigma_yy = 0
+    sigma_xy = 0
   
-    q_x =  0.1
-    q_y =  0.1
+    q_x = 0
+    q_y = 0
   
   
     w0 = 1 + drho / rho_r
