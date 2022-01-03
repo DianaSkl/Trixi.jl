@@ -7,8 +7,10 @@ using Plots
 # semidiscretization of the compressible Euler equations
 vxr = 0.0
 vyr = 0.0
-theta_r = 0.001
+theta_r = 0.01
 tau = 0.0001
+# tau = 0.005 instability 
+# tau = 0.1 instability
 
 equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, tau)
 
