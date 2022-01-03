@@ -70,7 +70,7 @@ save_solution = SaveSolutionCallback(interval=20,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)
 
-stepsize_callback = StepsizeCallback(cfl=1.3)
+stepsize_callback = StepsizeCallback(cfl=0.5)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
@@ -89,4 +89,4 @@ summary_callback() # print the timer summary
 
 pdkh1 = PlotData1D(sol; solution_variables=cons2prim)
 pdkh2 = PlotData2D(sol; solution_variables=cons2prim)
-plot(pdkh1)
+plot!(pdkh1)

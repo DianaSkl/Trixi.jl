@@ -15,7 +15,9 @@ for i = 1:length(y)
     
     vx[i] = 0.5 * (B[i] - 1)
     vy[i] = 0.1 * sin(2 * pi * x[i])
-    theta[i] = p/(rho[i]*8.314)
+    tmp = 1/(5/3-1.0) + 0.5*(rho[i]*vx[i]^2+rho[i]*vy[i]^2)
+    #theta[i] = (5/3-1.0)*(tmp/rho[i]- 0.5*(rho[i]*vx[i]^2 + rho[i]*vy[i]^2))
+    theta[i] = 1/(rho[i]*8)
     global bla = bla + theta[i]
 end
 

@@ -5,10 +5,10 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-vxr = -0.002
+vxr = 0.0
 vyr = 0.0
-theta_r = 0.14
-tau = 0.001
+theta_r = 0.001
+tau = 0.0001
 
 equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, tau)
 
@@ -31,8 +31,9 @@ function initial_condition_kelvin_helmholtz_instability(x, t, equations::Perturb
     vx = 0.5 * (B - 1)
     vy = 0.1 * sin(2 * pi * x[1])
     p = 1.0
-    theta = p/(rho*8.314)
-
+    #tmp = p/(5/3-1.0) + 0.5*(rho*vx^2+rho*vy^2)
+    #theta = (5/3-1.0)*(tmp/rho - 0.5*(rho*vx^2 + rho*vy^2))
+  theta = p/(rho*8)
     return prim2cons(SVector(rho, vx, vy, theta), equations)
 end
   
@@ -60,14 +61,14 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=6,
+                initial_refinement_level=5,
                 n_cells_max=100_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 0.7)
+tspan = (0.0, 0.5)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -82,7 +83,7 @@ save_solution = SaveSolutionCallback(interval=20,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)
 
-stepsize_callback = StepsizeCallback(cfl=0.1)
+stepsize_callback = StepsizeCallback(cfl=0.5)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
@@ -106,4 +107,4 @@ summary_callback() # print the timer summary
 
 pdt1 = PlotData1D(sol; solution_variables=cons2prim)
 pdt2 = PlotData2D(sol; solution_variables=cons2prim)
-plot(pdt1)
+plot!(pdt1)
