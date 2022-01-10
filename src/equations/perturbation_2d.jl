@@ -3,14 +3,17 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     vyr::RealT
     theta_r::RealT
     tau::RealT
-  end
-  varnames(::typeof(cons2prim), ::PerturbationMomentSystem2D) = ("rho", "vx", "vy", "theta")
-  varnames(::typeof(cons2cons), ::PerturbationMomentSystem2D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
+end
+
+varnames(::typeof(cons2prim), ::PerturbationMomentSystem2D) = ("rho", "v1", "v2", "theta")
+varnames(::typeof(cons2cons), ::PerturbationMomentSystem2D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
   
-  @inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem2D)
+@inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem2D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
     @unpack vxr, vyr, theta_r = equations
   
+    
+    
     if orientation == 1
         
       f1  = vxr * w0  + sqrt(theta_r) * w0x
@@ -38,57 +41,19 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     end
     
     return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
-  end
+end
   
   
   
   
-  @inline function flux_ranocha(u_ll, u_rr, orientation::Integer, equations::PerturbationMomentSystem2D)
-    # Unpack left and right state
-    rho_ll, v1_ll, v2_ll, t_ll = cons2prim(u_ll, equations)
-    rho_rr, v1_rr, v2_rr, t_rr = cons2prim(u_rr, equations)
-    
-    p_ll = t_ll*rho_ll
-    p_rr = t_rr*rho_rr
   
-    # Compute the necessary mean values
-    rho_mean = ln_mean(rho_ll, rho_rr)
-    # Algebraically equivalent to `inv_ln_mean(rho_ll / p_ll, rho_rr / p_rr)`
-    # in exact arithmetic since
-    #     log((ϱₗ/pₗ) / (ϱᵣ/pᵣ)) / (ϱₗ/pₗ - ϱᵣ/pᵣ)
-    #   = pₗ pᵣ log((ϱₗ pᵣ) / (ϱᵣ pₗ)) / (ϱₗ pᵣ - ϱᵣ pₗ)
-    #inv_rho_p_mean = p_ll * p_rr * inv_ln_mean(rho_ll * p_rr, rho_rr * p_ll)
-    v1_avg = 0.5 * (v1_ll + v1_rr)
-    v2_avg = 0.5 * (v2_ll + v2_rr)
-    p_avg  = 0.5 * (p_ll + p_rr)
-    t_avg = 0.5 * (t_ll + t_rr)
-    velocity_square_avg = 0.5 * (v1_ll*v1_rr + v2_ll*v2_rr)
   
-    u = prim2cons(SVector(rho_mean, v1_avg, v2_avg, t_avg), equations)
-  
-    # Calculate fluxes depending on orientation
-    # if orientation == 1
-    #   f1 = rho_mean * v1_avg
-    #   f2 = f1 * v1_avg + p_avg
-    #   f3 = f1 * v2_avg
-    #   f4 = f1 * ( velocity_square_avg + inv_rho_p_mean * equations.inv_gamma_minus_one ) + 0.5 * (p_ll*v1_rr + p_rr*v1_ll)
-    # else
-    #   f1 = rho_mean * v2_avg
-    #   f2 = f1 * v1_avg
-    #   f3 = f1 * v2_avg + p_avg
-    #   f4 = f1 * ( velocity_square_avg + inv_rho_p_mean * equations.inv_gamma_minus_one ) + 0.5 * (p_ll*v2_rr + p_rr*v2_ll)
-    # end
-  
-    return flux(u, orientation, equations)
-  end
-  
-  @inline function cons2prim(u, equations::PerturbationMomentSystem2D)
+@inline function cons2prim(u, equations::PerturbationMomentSystem2D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
     @unpack vxr, vyr, theta_r = equations
 
-    #rho_r = 1.24
-    rho_r = 0.5
-
+   
+    rho_r = 1.24
     rho = w0 * rho_r
     v_x = vxr + w0x * sqrt(theta_r) / w0
     v_y = vyr + w0y * sqrt(theta_r) / w0
@@ -101,14 +66,14 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
     
     return SVector(rho, v_x, v_y, theta)
-  end
+end
   
   @inline function prim2cons(u, equations::PerturbationMomentSystem2D)
     rho, vx, vy, theta = u
     @unpack vxr, vyr, theta_r = equations
   
-    #rho_r = 1.24
-    rho_r = 0.5
+
+    rho_r = 1.24
 
     drho = rho - rho_r
     dv_x = vx - vxr 
@@ -120,7 +85,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
     q_x = 0.0
     q_y = 0.0
-  
+    
   
     w0 = 1 + drho / rho_r
     w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
@@ -187,6 +152,7 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
     du5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
 
+    
     return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
   end
   
@@ -200,10 +166,11 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     ω = 2 * pi * f
     ini = c + A * sin(ω * (x[1] + x[2] - t))
   
+   
     @unpack vxr,vyr, theta_r = equations
   
     gamma = 1.4
-  
+ 
     rho = ini
     rho_r = 2
     drho = rho-rho_r
@@ -214,7 +181,6 @@ struct PerturbationMomentSystem2D{RealT<:Real} <: AbstractPerturbationMomentSyst
     theta = (gamma-1)*(ini-(vx^2 + vy^2)/2)
    
     dtheta = theta -  theta_r
-  
   
   
     r1 = 100000
