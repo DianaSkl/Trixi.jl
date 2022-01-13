@@ -5,10 +5,10 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-vxr = -0.02
+vxr = 0.0
 vyr = 0.0
-theta_r = 1.973
-tau = 0.0001
+theta_r = 1.0
+tau = 0.002
 
 
 equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, tau)
@@ -28,9 +28,9 @@ function initial_condition_kelvin_helmholtz_instability(x, t, equations::Perturb
     z2 = 1.5
     s=0.2
     tmp = tanh((x[2]-z1)/a)- tanh((x[2]-z2)/a)
-    rho = 1 + 0.5*tmp
-    vx = tmp -1
-    vy = 0.01*sin(2 * pi * x[1])*(exp(-(x[2]-z1)^2/s^2)+ exp(-(x[2]-z2)^2/s^2))
+    rho = 1 + 0.5*tmp*0.0
+    vx = tmp - 1
+    vy = 0.01*sin(2 * pi * x[1])*(exp(-((x[2]-z1)^2)/s^2)+ exp(-((x[2]-z2)^2)/s^2))
     p = 10
     theta = p/rho
 
@@ -55,20 +55,20 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_dg=volume_flux,
                                                  volume_flux_fv=surface_flux)
 
-volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
+#volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 coordinates_min = (0.0, 0.0)
-coordinates_max = (1.0, 2.0)
+coordinates_max = (1.0, 1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=5,
+                initial_refinement_level=6,
                 n_cells_max=100_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 3.0)
+tspan = (0.0, 1.0)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -94,10 +94,10 @@ callbacks = CallbackSet(summary_callback,
 ###############################################################################
 # run the simulation
 
-sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
-            dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
-            save_everystep=false, callback=callbacks);
-#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
+# sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
+#             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
+#             save_everystep=false, callback=callbacks);
+sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
 
 
 summary_callback() # print the timer summary

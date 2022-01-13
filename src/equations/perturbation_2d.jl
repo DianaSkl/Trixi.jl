@@ -53,7 +53,9 @@ end
     @unpack vxr, vyr, theta_r = equations
 
    
-    rho_r = 1.24
+   
+    rho_r = 0.5
+
     rho = w0 * rho_r
     v_x = vxr + w0x * sqrt(theta_r) / w0
     v_y = vyr + w0y * sqrt(theta_r) / w0
@@ -73,18 +75,20 @@ end
     @unpack vxr, vyr, theta_r = equations
   
 
-    rho_r = 1.24
+   
+    rho_r = 0.5
 
     drho = rho - rho_r
     dv_x = vx - vxr 
     dv_y = vy - vyr 
     dtheta = theta - theta_r
-    sigma_xx = 0.0
-    sigma_yy = 0.0
-    sigma_xy = 0.0
+    sigma_xx = 0
+    sigma_yy = 0
+    sigma_xy = 0
   
-    q_x = 0.0
-    q_y = 0.0
+    q_x = 0
+    q_y = 0
+    #q_y = -2.6
     
   
     w0 = 1 + drho / rho_r
@@ -152,7 +156,6 @@ end
     du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
     du5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
 
-    
     return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
   end
   
