@@ -10,15 +10,7 @@ tmp = zeros(length(y))
 diffi = zeros(length(y))
 global bla = 0.0
 
-for j = 1:length(x)
 
-    a = 0.05
-    z1 = 0.5
-    z2 = 1.5
-    s=0.2
-    vy[j] = 0.01*sin(2 * pi * x[j])*(exp(-(x[j]-z1)^2/s^2)+ exp(-(x[j]-z2)^2/s^2))
-    
-end
 
 for i = 1:length(y)
     # B[i] = tanh(slope * y[i] + 7.5) - tanh(slope * y[i] - 7.5)
@@ -37,20 +29,21 @@ for i = 1:length(y)
         tmp[i] = tanh((y[i]-z1)/a)- tanh((y[i]-z2)/a)
         rho[i] = 1 + 0.5*tmp[i]
         vx[i] = tmp[i] -1
+        vy[i] = 0.01*sin(2 * pi * y[i])*(exp(-(y[i]-z1)^2/s^2)+ exp(-(y[i]-z2)^2/s^2))
         local p = 10
         theta[i] = p/rho[i]
         diffi[i] = 0.01*((exp(-(-1.5 + y[i])^2)/25)*(-1.5 + y[i]) - (exp(-(-0.5 + y[i])^2)/25)*(-0.5 + y[i]))*sin(2*pi*x[i])/50
-        global bla = bla + diffi[i]
+        global bla = bla + theta[i]
 end
     
 
 p1 = plot(y, rho, title="rho")
-p2 = plot(y, vx, title = "vx")
-p3 = plot(x, vy, title ="vy")
+p2 = plot(y, vx, title = "v1")
+p3 = plot(x, vy, title ="v2")
 p4 = plot(y, theta, title ="theta")
 
 plot(p1,p2,p3,p4)
 
 
-plot(y, diffi, title = "diff")
+#plot(y, diffi, title = "diff")
 bla/257

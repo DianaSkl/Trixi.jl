@@ -32,9 +32,7 @@ function initial_condition_kelvin_helmholtz_instability(x, t, equations::Perturb
     vx = 0.5 * (B - 1)
     vy = 0.1 * sin(2 * pi * x[1])
     p = 1.0
-    #tmp = p/(5/3-1.0) + 0.5*(rho*vx^2+rho*vy^2)
-    #theta = (5/3-1.0)*(tmp/rho - 0.5*(rho*vx^2 + rho*vy^2))
-    theta = 5*p/(3*rho)
+    theta = p/rho
     return prim2cons(SVector(rho, vx, vy, theta), equations)
 end
   
