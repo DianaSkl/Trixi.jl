@@ -7,11 +7,11 @@ using Plots
 # semidiscretization of the compressible Euler equations
 vxr = -0.002
 vyr = 0.0
-theta_r = 1.973
-tau = 0.0001
+theta_r = 1.18
+tau = 0.01
+rho_r = 1.24
 
-
-equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, tau)
+equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 """
     initial_condition_kelvin_helmholtz_instability(x, t, equations::CompressibleEulerEquations2D)
@@ -67,7 +67,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 0.9)
+tspan = (0.0, 0.2)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()

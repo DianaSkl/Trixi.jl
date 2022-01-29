@@ -5,7 +5,7 @@ using Plots
 ###############################################################################
 # semidiscretization of the compressible Euler equations
 
-tau = 0.5
+tau = 1.0
 vxr = 0.1
 equations = PerturbationMomentSystem1D(vxr, 2/3, tau)
 initial_condition = initial_condition_convergence_test
@@ -14,7 +14,7 @@ initial_condition = initial_condition_convergence_test
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
 coordinates_min = 0
-coordinates_max = 6
+coordinates_max = 2
 
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=4, n_cells_max=10_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
@@ -22,7 +22,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-t = 0.1
+t = 0.7
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 summary_callback = SummaryCallback()
@@ -38,7 +38,7 @@ save_restart = SaveRestartCallback(interval=100, save_final_restart=true)
 save_solution = SaveSolutionCallback(interval=100, solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-stepsize_callback = StepsizeCallback(cfl=0.1)
+stepsize_callback = StepsizeCallback(cfl=0.5)
 
 callbacks = CallbackSet(summary_callback,analysis_callback, alive_callback, save_restart, save_solution, stepsize_callback)
 
@@ -50,6 +50,6 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
 summary_callback()
 
 
-pd3 = PlotData1D(sol; solution_variables=cons2prim)
-#plot(pd, label = "Momentensys. t = "*string(t))
-plot(pd3.x, pd3.data[:,2], xlims = (coordinates_min, coordinates_max), title ="rho", label = "M t = " *string(t), markersize=3)
+pd = PlotData1D(sol; solution_variables=cons2prim)
+#plot(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), label = "Lösung neu", title ="vx")
+plot(pd)

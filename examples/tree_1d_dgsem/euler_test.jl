@@ -95,13 +95,13 @@ solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 coordinates_min = 0
 coordinates_max = 2
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=4, n_cells_max=10_000, periodicity=true)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=5, n_cells_max=10_000, periodicity=true)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test, boundary_conditions=boundary_conditions)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-t = 0.1
+t = 0.5
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 # At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
@@ -147,5 +147,5 @@ summary_callback()
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
 
-plot!(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), label = "Euler t= "*string(t), markersize=3)
-
+#plot!(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), label = "Euler t= "*string(t), markersize=3)
+plot(pd)

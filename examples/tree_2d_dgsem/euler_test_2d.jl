@@ -15,12 +15,12 @@ solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
 
 min = 0.0
-max = 4.0
+max = 2.0
 coordinates_min = (min, min)
 coordinates_max = (max, max)
 mesh = TreeMesh(coordinates_min, coordinates_max,
                 initial_refinement_level=4,
-                n_cells_max=10_000)
+                n_cells_max=100_000)
 
 
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver,
@@ -29,7 +29,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver,
 
 ###############################################################################
 # ODE solvers, callbacks etc.
-t = 0.2
+t = 0.5
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
@@ -48,7 +48,7 @@ save_solution = SaveSolutionCallback(interval=100,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)
 
-stepsize_callback = StepsizeCallback(cfl=0.1)
+stepsize_callback = StepsizeCallback(cfl=0.5)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
@@ -63,5 +63,5 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
 summary_callback() # print the timer summary
 
 pde = PlotData1D(sol; solution_variables=cons2prim)
-#plot(pd1.x, pd1.data[:,2], xlims = (min,max), label = "2D Euler t = " *string(t), title ="vx")
+
 plot(pde)

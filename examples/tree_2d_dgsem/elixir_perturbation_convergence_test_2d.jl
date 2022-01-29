@@ -4,11 +4,12 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-vxr = 0.9
+vxr = 0.1
 vyr = 0.1
 theta_r = 1/3
-tau = 0.2
-equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, tau)
+rho_r = 2.0
+tau = 0.5
+equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 initial_condition = initial_condition_convergence_test
 
@@ -16,13 +17,13 @@ initial_condition = initial_condition_convergence_test
 
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
-min = 0.0
-max = 4.0
+min = 0
+max = 4
 coordinates_min = (min, min)
 coordinates_max = (max, max)
 mesh = TreeMesh(coordinates_min, coordinates_max,
                 initial_refinement_level=4,
-                n_cells_max=10_000)
+                n_cells_max=100_000)
 
 
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver,
@@ -31,7 +32,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver,
 
 ###############################################################################
 # ODE solvers, callbacks etc.
-t = 0.2
+t = 0.5
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
@@ -50,7 +51,7 @@ save_solution = SaveSolutionCallback(interval=100,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)
 
-stepsize_callback = StepsizeCallback(cfl=0.1)
+stepsize_callback = StepsizeCallback(cfl=0.5)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
