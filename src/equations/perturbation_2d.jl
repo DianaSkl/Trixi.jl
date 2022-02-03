@@ -136,14 +136,20 @@ end
     r1 = 100000000
     r2 = 100000000
   
-    sxx = (ini-2)/r1
-    syy = (ini-2)/r1
-    sxy = (ini-2)/r1
+    #sxx = (ini-2)/r1
+    #syy = (ini-2)/r1
+    #sxy = (ini-2)/r1
 
-    qx = (ini-2)/r2
-    qy = (ini-2)/r2
-    # qx = (15*A*tau*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(A*sin((x2+x1-t)*ω)-0.5*(vy^2+vx^2)+c)*(gamma-1)^2)/4
-    # qy = (15*A*tau*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(A*sin((x2+x1-t)*ω)-0.5*(vy^2+vx^2)+c)*(gamma-1)^2)/4
+    sxx = 0.0
+    syy = 0.0
+    sxy = 0.0
+
+    qx = 0.0
+    qy = 0.0
+
+    #qx = (ini-2)/r2
+    #qy = (ini-2)/r2
+   
   
     w0 = rho/rho_r
     w0x = (rho * dvx)/(rho_r * sqrt(theta_r))
@@ -193,46 +199,49 @@ end
     a4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
     a5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
   
+    a2 = a1 = a3 = a4 = a5 = 0
 
-    # dw0_x = (A*ω*cos((x2+x1-t)*ω))/c
+    # const
 
-    # dw0x_x = (A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/(c*sqrt(theta_r))
+    dw0_x = (A*ω*cos((x2+x1-t)*ω))/c
 
-    # dw0y_x = (A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(c*sqrt(theta_r))
+    dw0x_x = (A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/(c*sqrt(theta_r))
+
+    dw0y_x = (A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(c*sqrt(theta_r))
+
+    dw1_x = (A*ω*cos((x2+x1-t)*ω)*(1-p1*(A*sin((x2+x1-t)*ω)+c)))/(c*theta_r)-(A*p1*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c))/(c*theta_r)-(A*((vy-vyr)^2+(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(3*c*theta_r)
+
+    dw0xx_x = (A*(p1*(vx-vxr)^2-p2*(vy-vyr)^2)*ω*cos((x2+x1-t)*ω))/(c^2*theta_r)
+
+    dw0yy_x = (A*(p1*(vy-vyr)^2-p2*(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(c^2*theta_r)
+
+    dw0xy_x = (A*(vx-vxr)*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(2*c*theta_r)
+
+    dw1x_x = -(A*(vx-vxr)*ω*cos((x2+x1-t)*ω)*(p1*(A*sin((x2+x1-t)*ω)+c)-1))/(c*theta_r^(3/2))-(A*p1*(vx-vxr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c))/(c*theta_r^(3/2))-(A*((vx-vxr)*(vy-vyr)^2+(vx-vxr)^3)*ω*cos((x2+x1-t)*ω))/(5*c*theta_r^(3/2))
+    
+    dw1y_x = -(A*(vy-vyr)*ω*cos((x2+x1-t)*ω)*(p1*(A*sin((x2+x1-t)*ω)+c)-1))/(c*theta_r^(3/2))-(A*p1*(vy-vyr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c))/(c*theta_r^(3/2))-(A*((vx-vxr)^2*(vy-vyr)+(vy-vyr)^3)*ω*cos((x2+x1-t)*ω))/(5*c*theta_r^(3/2))
+    
+    # periodisch 
+
+    # dw0_x = (A*ω*cos((x2+x1-t)*ω))/rho_r
+
+    # dw0x_x = (A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/(rho_r*sqrt(theta_r))
+
+    # dw0y_x = (A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(rho_r*sqrt(theta_r))
  
-    # dw1_x = (A*ω*cos((x2+x1-t)*ω)*(1-p1*(A*sin((x2+x1-t)*ω)+c)))/(c*theta_r)-(A*p1*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c))/(c*theta_r)-(A*((vy-vyr)^2+(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(3*c*theta_r)
+    # dw1_x = -(A*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(gamma-1))/(rho_r*theta_r)+(A*ω*cos((x2+x1-t)*ω)*(theta_r-(A*sin((x2+x1-t)*ω)-m*(vy^2+vx^2)+c)*(gamma-1)))/(rho_r*theta_r)-(A*((vy-vyr)^2+(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(3*rho_r*theta_r)
     
-    # dw0xx_x = (A*(p1*(vx-vxr)^2-p2*(vy-vyr)^2)*ω*cos((x2+x1-t)*ω)+(A*ω*cos((x2+x1-t)*ω))/r1)/(c^2*theta_r)
+    # dw0xx_x = (A*(p1*(vx-vxr)^2-p2*(vy-vyr)^2)*ω*cos((x2+x1-t)*ω)+(A*ω*cos((x2+x1-t)*ω))/r1)/(c*rho_r*theta_r)
     
-    # dw0yy_x = (A*(p1*(vy-vyr)^2-p2*(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(c^2*theta_r)+(A*ω*cos((x2+x1-t)*ω))/(c^2*r1*theta_r)
-
-    # dw0xy_x = (A*(vx-vxr)*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(2*c*theta_r)+(A*ω*cos((x2+x1-t)*ω))/(c^2*r1*theta_r)
-
-    # dw1x_x = -(-(15*A*tau*ω^2*sin((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(A*sin((x2+x1-t)*ω)-0.5*(vy^2+vx^2)+c)*(gamma-1)^2)/4+(15*A^2*tau*ω^2*cos((x2+x1-t)*ω)^2*(A*sin((x2+x1-t)*ω)-0.5*(vy^2+vx^2)+c)*(gamma-1)^2)/4+(15*A^2*tau*ω^2*cos((x2+x1-t)*ω)^2*(A*sin((x2+x1-t)*ω)+c)*(gamma-1)^2)/4+(A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/r1+(A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/r1)/(5*theta_r^(3/2))-(A*(vx-vxr)*ω*cos((x2+x1-t)*ω)*(p1*(A*sin((x2+x1-t)*ω)+c)-1))/(c*theta_r^(3/2))-(A*p1*(vx-vxr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c))/(c*theta_r^(3/2))-(A*((vx-vxr)*(vy-vyr)^2+(vx-vxr)^3)*ω*cos((x2+x1-t)*ω))/(5*c*theta_r^(3/2))
+    # dw0yy_x = (A*(p1*(vy-vyr)^2-p2*(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(c*rho_r*theta_r)+(A*ω*cos((x2+x1-t)*ω))/(c*r1*rho_r*theta_r)
+   
+    # dw0xy_x = (A*(vx-vxr)*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(c*rho_r*theta_r)+(A*ω*cos((x2+x1-t)*ω))/(c*r1*rho_r*theta_r)
+ 
+    # dw1x_x = -(A*(vx-vxr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(gamma-1))/(rho_r*theta_r^(3/2))-(A*(vx-vxr)*ω*cos((x2+x1-t)*ω)*((A*sin((x2+x1-t)*ω)-m*(vy^2+vx^2)+c)*(gamma-1)-theta_r))/(rho_r*theta_r^(3/2))-(c*((A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/r1+(A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/r1+(A*ω*cos((x2+x1-t)*ω))/r2))/(5*rho_r*theta_r^(3/2))-(A*((vx-vxr)*(vy-vyr)^2+(vx-vxr)^3)*ω*cos((x2+x1-t)*ω))/(5*rho_r*theta_r^(3/2))
   
-    # dw1y_x = -(-(15*A*tau*ω^2*sin((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(A*sin((x2+x1-t)*ω)-0.5*(vy^2+vx^2)+c)*(gamma-1)^2)/4+(15*A^2*tau*ω^2*cos((x2+x1-t)*ω)^2*(A*sin((x2+x1-t)*ω)-0.5*(vy^2+vx^2)+c)*(gamma-1)^2)/4+(15*A^2*tau*ω^2*cos((x2+x1-t)*ω)^2*(A*sin((x2+x1-t)*ω)+c)*(gamma-1)^2)/4+(A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/r1+(A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/r1)/(5*theta_r^(3/2))-(A*(vy-vyr)*ω*cos((x2+x1-t)*ω)*(p1*(A*sin((x2+x1-t)*ω)+c)-1))/(c*theta_r^(3/2))-(A*p1*(vy-vyr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c))/(c*theta_r^(3/2))-(A*((vx-vxr)^2*(vy-vyr)+(vy-vyr)^3)*ω*cos((x2+x1-t)*ω))/(5*c*theta_r^(3/2))
+    # dw1y_x = -(A*(vy-vyr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(gamma-1))/(rho_r*theta_r^(3/2))-(A*(vy-vyr)*ω*cos((x2+x1-t)*ω)*((A*sin((x2+x1-t)*ω)-m*(vy^2+vx^2)+c)*(gamma-1)-theta_r))/(rho_r*theta_r^(3/2))-(c*((A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/r1+(A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/r1+(A*ω*cos((x2+x1-t)*ω))/r2))/(5*rho_r*theta_r^(3/2))-(A*((vx-vxr)^2*(vy-vyr)+(vy-vyr)^3)*ω*cos((x2+x1-t)*ω))/(5*rho_r*theta_r^(3/2))
    
 
-
-
-    dw0_x = (A*ω*cos((x2+x1-t)*ω))/rho_r
-
-    dw0x_x = (A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/(rho_r*sqrt(theta_r))
-
-    dw0y_x = (A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(rho_r*sqrt(theta_r))
- 
-    dw1_x = -(A*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(gamma-1))/(rho_r*theta_r)+(A*ω*cos((x2+x1-t)*ω)*(theta_r-(A*sin((x2+x1-t)*ω)-m*(vy^2+vx^2)+c)*(gamma-1)))/(rho_r*theta_r)-(A*((vy-vyr)^2+(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(3*rho_r*theta_r)
-    
-    dw0xx_x = (A*(p1*(vx-vxr)^2-p2*(vy-vyr)^2)*ω*cos((x2+x1-t)*ω)+(A*ω*cos((x2+x1-t)*ω))/r1)/(c*rho_r*theta_r)
-    
-    dw0yy_x = (A*(p1*(vy-vyr)^2-p2*(vx-vxr)^2)*ω*cos((x2+x1-t)*ω))/(c*rho_r*theta_r)+(A*ω*cos((x2+x1-t)*ω))/(c*r1*rho_r*theta_r)
-   
-    dw0xy_x = (A*(vx-vxr)*(vy-vyr)*ω*cos((x2+x1-t)*ω))/(c*rho_r*theta_r)+(A*ω*cos((x2+x1-t)*ω))/(c*r1*rho_r*theta_r)
- 
-    dw1x_x = -(A*(vx-vxr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(gamma-1))/(rho_r*theta_r^(3/2))-(A*(vx-vxr)*ω*cos((x2+x1-t)*ω)*((A*sin((x2+x1-t)*ω)-m*(vy^2+vx^2)+c)*(gamma-1)-theta_r))/(rho_r*theta_r^(3/2))-(c*((A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/r1+(A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/r1+(A*ω*cos((x2+x1-t)*ω))/r2))/(5*rho_r*theta_r^(3/2))-(A*((vx-vxr)*(vy-vyr)^2+(vx-vxr)^3)*ω*cos((x2+x1-t)*ω))/(5*rho_r*theta_r^(3/2))
-  
-    dw1y_x = -(A*(vy-vyr)*ω*cos((x2+x1-t)*ω)*(A*sin((x2+x1-t)*ω)+c)*(gamma-1))/(rho_r*theta_r^(3/2))-(A*(vy-vyr)*ω*cos((x2+x1-t)*ω)*((A*sin((x2+x1-t)*ω)-m*(vy^2+vx^2)+c)*(gamma-1)-theta_r))/(rho_r*theta_r^(3/2))-(c*((A*(vy-vyr)*ω*cos((x2+x1-t)*ω))/r1+(A*(vx-vxr)*ω*cos((x2+x1-t)*ω))/r1+(A*ω*cos((x2+x1-t)*ω))/r2))/(5*rho_r*theta_r^(3/2))-(A*((vx-vxr)^2*(vy-vyr)+(vy-vyr)^3)*ω*cos((x2+x1-t)*ω))/(5*rho_r*theta_r^(3/2))
-   
    f1 = -dw0_x + vxr * dw0_x  + sqrt(theta_r) * dw0x_x + vyr * dw0_x + sqrt(theta_r) * dw0y_x
    f2 = -dw0x_x + vxr * dw0x_x + sqrt(theta_r) * (dw0_x - dw1_x) + 2.0 * sqrt(theta_r) * dw0xx_x + vyr * dw0x_x + 2.0 * sqrt(theta_r) * dw0xy_x
    f3 = -dw0y_x + vxr * dw0y_x + 2.0 * sqrt(theta_r) * dw0xy_x + vyr * dw0y_x + sqrt(theta_r) * (dw0_x - dw1_x + 2.0 * dw0yy_x)
@@ -243,20 +252,6 @@ end
    f8 = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + vyr * dw1x_x - sqrt(theta_r) * 4.0 * dw0xy_x / 5.0 + a4/tau
    f9 = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + vyr * dw1y_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0yy_x / 5.0) + a5/tau
 
-  
-
-   du1 = (ω*cos((-z+x2+x1)*ω))/20
-   du2 = ((3*r1*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+45*r1*ω*cos((-z+x2+x1)*ω))*gamma-3*r1*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(-15*r1*vxr-30*r1+30)*ω*cos((-z+x2+x1)*ω))/(100*sqrt(3)*r1)
-   du3 = ((3*r1*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+45*r1*ω*cos((-z+x2+x1)*ω))*gamma-3*r1*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(-15*r1*vyr-30*r1+30)*ω*cos((-z+x2+x1)*ω))/(100*sqrt(3)*r1)
-   du4 = (((2*r1*r2*vyr+2*r1*r2*vxr-7*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(30*r1*r2*vyr+30*r1*r2*vxr-105*r1*r2)*ω*cos((-z+x2+x1)*ω))*gamma+(-2*r1*r2*vyr-2*r1*r2*vxr+7*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(-5*r1*r2*vyr^2+(20-20*r1)*r2*vyr-5*r1*r2*vxr^2+(20-20*r1)*r2*vxr+(100*r1-40)*r2-20*r1)*ω*cos((-z+x2+x1)*ω))/(100*r1*r2)
-   du5 = (((2*r1*r2*vyr-4*r1*r2*vxr+2*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(30*r1*r2*vyr-60*r1*r2*vxr+30*r1*r2)*ω*cos((-z+x2+x1)*ω))*gamma+(-2*r1*r2*vyr+4*r1*r2*vxr-2*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(-3*r1*r2*vyr^3+(13*r1*r2-9*r1*r2*vxr)*vyr^2+(12*r1*r2*vxr^2-6*r1*r2*vxr+(11-35*r1)*r2)*vyr+6*r1*r2*vxr^3-20*r1*r2*vxr^2+(73*r1+11)*r2*vxr+(-31*r1-7)*r2+4*r1)*ω*cos((-z+x2+x1)*ω))/(200*r1*r2) + a1/tau
-   du6 = -(((4*r1*r2*vyr-2*r1*r2*vxr-2*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(60*r1*r2*vyr-30*r1*r2*vxr-30*r1*r2)*ω*cos((-z+x2+x1)*ω))*gamma+(-4*r1*r2*vyr+2*r1*r2*vxr+2*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(-6*r1*r2*vyr^3+(20*r1*r2-12*r1*r2*vxr)*vyr^2+(9*r1*r2*vxr^2+6*r1*r2*vxr+(-73*r1-11)*r2)*vyr+3*r1*r2*vxr^3-13*r1*r2*vxr^2+(35*r1-11)*r2*vxr+(31*r1+7)*r2-4*r1)*ω*cos((-z+x2+x1)*ω))/(200*r1*r2) + a2/tau
-   du7 = -(((3*r1*r2*vyr+3*r1*r2*vxr-6*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(45*r1*r2*vyr+45*r1*r2*vxr-90*r1*r2)*ω*cos((-z+x2+x1)*ω))*gamma+(-3*r1*r2*vyr-3*r1*r2*vxr+6*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(3*r1*r2*vyr^3+(3*r1*r2-12*r1*r2*vxr)*vyr^2+(-12*r1*r2*vxr^2+33*r1*r2*vxr+(-57*r1-3)*r2)*vyr+3*r1*r2*vxr^3+3*r1*r2*vxr^2+(-57*r1-3)*r2*vxr+(93*r1-9)*r2-12*r1)*ω*cos((-z+x2+x1)*ω))/(200*r1*r2) + a3/tau
-   du8 = ((((9*r1*r2*vxr-9*r1*r2)*vyr+9*r1*r2*vxr^2-18*r1*r2*vxr+6*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+((135*r1*r2*vxr-135*r1*r2)*vyr+135*r1*r2*vxr^2-270*r1*r2*vxr+90*r1*r2)*ω*cos((-z+x2+x1)*ω))*gamma+((9*r1*r2-9*r1*r2*vxr)*vyr-9*r1*r2*vxr^2+18*r1*r2*vxr-6*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+((9*r1*r2*vxr-9*r1*r2)*vyr^3+(9*r1*r2*vxr^2-36*r1*r2*vxr+(24*r1+18)*r2)*vyr^2+(9*r1*r2*vxr^3-45*r1*r2*vxr^2+(36-84*r1)*r2*vxr+(126*r1-54)*r2-18*r1)*vyr+9*r1*r2*vxr^4-36*r1*r2*vxr^3+(18-96*r1)*r2*vxr^2+((270*r1-54)*r2-18*r1)*vxr+(24-100*r1)*r2+18*r1)*ω*cos((-z+x2+x1)*ω))/(100*sqrt(3)*r1*r2) + a4/tau
-   du9 = (((9*r1*r2*vyr^2+(9*r1*r2*vxr-18*r1*r2)*vyr-9*r1*r2*vxr+6*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(135*r1*r2*vyr^2+(135*r1*r2*vxr-270*r1*r2)*vyr-135*r1*r2*vxr+90*r1*r2)*ω*cos((-z+x2+x1)*ω))*gamma+(-9*r1*r2*vyr^2+(18*r1*r2-9*r1*r2*vxr)*vyr+9*r1*r2*vxr-6*r1*r2)*ω*cos((-z+x2+x1)*ω)*sin((-z+x2+x1)*ω)+(9*r1*r2*vyr^4+(9*r1*r2*vxr-36*r1*r2)*vyr^3+(9*r1*r2*vxr^2-45*r1*r2*vxr+(18-96*r1)*r2)*vyr^2+(9*r1*r2*vxr^3-36*r1*r2*vxr^2+(36-84*r1)*r2*vxr+(270*r1-54)*r2-18*r1)*vyr-9*r1*r2*vxr^3+(24*r1+18)*r2*vxr^2+((126*r1-54)*r2-18*r1)*vxr+(24-100*r1)*r2+18*r1)*ω*cos((-z+x2+x1)*ω))/(100*sqrt(3)*r1*r2) + a5/tau
-  
-
-  #return SVector(du1, du2, du3, du4, du5, du6, du7, du8, du9)
   return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
   end 
   

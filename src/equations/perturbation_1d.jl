@@ -85,7 +85,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     ω = 2 * pi * f
     x1, = x
     ini = c + A * sin(ω * (x[1] - t))
-    r1 = 1000000000
+    r1 = 1000
   
     rho = ini
     rho_r = 2
@@ -99,10 +99,15 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     dtheta = theta - theta_r
 
   
-    sigma_xx = (ini-2)/r1
+    #sigma_xx = (ini-2)/r1
+    #sigma_xx = A*sin(-ω *t)
+    sigma_xx = A*sin(ω * (x[1] - t))
     sigma_xy = 0
     sigma_yy = 0
-    q_x = (ini-2)/r1
+
+    #q_x = (ini-2)/r1
+    #q_x = A*sin(-ω *t)
+    q_x = 0
     q_y = 0
   
     w0 = rho/rho_r
@@ -121,7 +126,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
   # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
   #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-  #   tau  = calc_tau(equations)
+
   
   #   du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
   #   du2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
@@ -145,75 +150,81 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     x1, = x
     ini = c + A * sin(ω * (x[1] - t))
     p1 = 2/3
-    p2 = 1/3 
-    r1 = 1000000000
-  
-    rho = ini
-    rho_r = 2.0
-    drho = rho - rho_r
-  
+
     vx = 1.0
-  
     dv_x = vx - vxr
-    dv_y = 0.0
-    theta = 2 * (ini - 0.5)/3
-    dtheta = theta - theta_r
-
-    z = t
-
+ 
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
   
-    a1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-    a2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-    a3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-    a4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-    a5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
+    a1 = -w0 * w0xx + w0x * w0x/3.0 - w0y * w0y/6.0 
+    a2 = -w0 * w0yy - w0x * w0x/6.0 + w0y * w0y/3.0
+    a3 = -w0 * w0xy + w0x * w0y/4.0 + w0y * w0x/4.0
+    a4 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/15.0 
+    a5 = -2.0 * w0 * w1y/3.0 + 2.0 * w1 * w0y/3.0 + 4.0 * w0x * w0xy/15.0 + 4.0 * w0y * w0yy/15.0  
+
+    #a1 = a4 = 0
+   
+  
+    
 
 
-    a1 = a2 = a3 = a4 = a5 = 0
-
-    dw0_t = -(A*ω*cos((x[1]-t)*ω))/c
+    # const
     dw0_x = (A*ω*cos((x[1]-t)*ω))/c
-    dw0x_t = -(A*dv_x*ω*cos((x[1]-t)*ω))/(c*sqrt(theta_r))
+    
     dw0x_x = (A*dv_x*ω*cos((x[1]-t)*ω))/(c*sqrt(theta_r))
-    dw0y_t = 0
+    
     dw0y_x = 0
-    dw1_t = (A*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r)+(A*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r)+(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c*theta_r)
+
     dw1_x = -(A*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r)-(A*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r)-(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c*theta_r)
-    dw0xx_t = (-(A*ω*cos((x[1]-t)*ω))/r1-(2*A*dv_x^2*ω*cos((x[1]-t)*ω))/3)/(2*c*theta_r)
-    dw0xx_x = ((A*ω*cos((x[1]-t)*ω))/r1+(2*A*dv_x^2*ω*cos((x[1]-t)*ω))/3)/(2*c*theta_r)
-    dw0yy_t = (A*dv_x^2*ω*cos((x[1]-t)*ω))/(6*c*theta_r)
-    dw0yy_x = -(A*dv_x^2*ω*cos((x[1]-t)*ω))/(6*c*theta_r)
-    dw0xy_t = 0
+    
+    dw0xx_x = (A*dv_x^2*p1*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
+    dw0xx_t = (-A*ω*cos(t*ω)-A*dv_x^2*p1*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
+    
+    dw0yy_x = -(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c^2*theta_r)
+    
     dw0xy_x = 0
-    dw1x_t = (A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)+(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)+(0.4*A*dv_x*ω*cos((x[1]-t)*ω))/(c*r1*theta_r^1.5)+(0.4*A*ω*cos((x[1]-t)*ω))/(c*r1*theta_r^1.5)+(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
-    dw1x_x = -(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)-(0.4*A*dv_x*ω*cos((x[1]-t)*ω))/(c*r1*theta_r^1.5)-(0.4*A*ω*cos((x[1]-t)*ω))/(c*r1*theta_r^1.5)-(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
-    dw1y_t = 0
+    
+    dw1x_x =-(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)-(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
+    dw1x_t =(0.2*A*dv_x*ω*cos(t*ω))/theta_r^1.5+(0.2*A*ω*cos(t*ω))/theta_r^1.5+(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)+(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)+(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
+
     dw1y_x = 0
 
 
-    f1  = dw0_t + vxr * dw0_x + sqrt(theta_r) * dw0x_x
-    f2  = dw0x_t + vxr * dw0x_x + sqrt(theta_r) * (dw0_x - dw1_x) + 2.0 * sqrt(theta_r) * dw0xx_x
-    f3  = dw0y_t + vxr * dw0y_x + 2.0 * sqrt(theta_r) * dw0xy_x
-    f4  = dw1_t + vxr * dw1_x + sqrt(theta_r) * (5.0 * dw1x_x - 2.0 * dw0x_x)/3.0
-    f5  = dw0xx_t + vxr * dw0xx_x + 2.0 * sqrt(theta_r)* (dw0x_x - dw1x_x)/3.0 + a1/tau
-    f6  = dw0yy_t + vxr * dw0yy_x + sqrt(theta_r) * (dw1x_x - dw0x_x)/3.0 + a2/tau
-    f7  = dw0xy_t + vxr * dw0xy_x + sqrt(theta_r) * (dw0y_x - dw1y_x)/2.0 + a3/tau
-    f8  = dw1x_t + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + a4/tau
-    f9  = dw1y_t + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + a5/tau
-
-    # du1 = 0
-    # du2 =(625*2^(13/2)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+700003*sqrt(2)*ω*cos((x1-z)*ω))/(4000000*sqrt(3))
-    # du3 = 0
-    # du4 = ((40000*vxr-40000)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(700003*vxr-700006)*ω*cos((x1-z)*ω))/6000000
-    # du5 = -((800000*vxr-800000)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(-1800000*vxr^3+5400000*vxr^2+8599979*vxr-12200003)*ω*cos((x1-z)*ω))/120000000 + a1/tau
-    # du6 = ((100000*vxr-100000)*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(-225000*vxr^3+675000*vxr^2+1075003*vxr-1525006)*ω*cos((x1-z)*ω))/30000000 + a2/tau
-    # du7 = a3/tau 
-    # du8 = ((9375*2^(11/2)*vxr^2-9375*2^(13/2)*vxr+3125*2^(11/2))*ω*cos((x1-z)*ω)*sin((x1-z)*ω)+(28125*2^(9/2)*vxr^4-28125*2^(13/2)*vxr^3+5550009*sqrt(2)*vxr^2-7500027*sqrt(2)*vxr+200003*2^(5/2))*ω*cos((x1-z)*ω))/(20000000*sqrt(3)) + a4/tau
-    # du9 = a5/tau
-
-    #return(du1,du2,du3,du4,du5,du6,du7,du8,du9)
+    # periodisch 
+    # dw0_x = (A*ω*cos((x[1]-t)*ω))/c
     
+    # dw0x_x = (A*dv_x*ω*cos((x[1]-t)*ω))/(c*sqrt(theta_r))
+    
+    # dw0y_x = 0
+
+    #dw1_x = -(A*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r)-(A*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r)-(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c*theta_r)
+    
+    dw0xx_x = (A*dv_x^2*p1*ω*cos((x[1]-t)*ω)+A*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
+
+    # dw0yy_x = -(A*dv_x^2*ω*cos((x[1]-t)*ω))/(6*c*theta_r)
+    
+    # dw0xy_x = 0
+    
+    dw1x_x = -(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)-(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)-(0.2*A*dv_x*ω*cos((x[1]-t)*ω))/theta_r^1.5
+    
+    # dw1y_x = 0
+
+
+    f1  = -dw0_x + vxr * dw0_x + sqrt(theta_r) * dw0x_x
+    f2  = -dw0x_x + vxr * dw0x_x + sqrt(theta_r) * (dw0_x - dw1_x) + 2.0 * sqrt(theta_r) * dw0xx_x
+    f3  = -dw0y_x + vxr * dw0y_x + 2.0 * sqrt(theta_r) * dw0xy_x
+    f4  = -dw1_x + vxr * dw1_x + sqrt(theta_r) * (5.0 * dw1x_x - 2.0 * dw0x_x)/3.0
+    f5  = -dw0xx_x + vxr * dw0xx_x + 2.0 * sqrt(theta_r)* (dw0x_x - dw1x_x)/3.0 + a1/tau
+    f6  = -dw0yy_x + vxr * dw0yy_x + sqrt(theta_r) * (dw1x_x - dw0x_x)/3.0 + a2/tau
+    f7  = -dw0xy_x + vxr * dw0xy_x + sqrt(theta_r) * (dw0y_x - dw1y_x)/2.0 + a3/tau
+    f8  = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + a4/tau
+    f9  = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + a5/tau
+
+
+    # print("a1/tau:")
+    # println(a1/tau)
+    # print("a2/tau:")
+    # println(a2/tau)
    
     return(f1,f2,f3,f4,f5,f6,f7,f8,f9)
   end 

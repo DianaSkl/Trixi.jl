@@ -8,17 +8,16 @@ vxr = 0.1
 vyr = 0.1
 theta_r = 1/3
 rho_r = 2.0
-tau = 0.5
+tau = 0.1
 equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 initial_condition = initial_condition_convergence_test
 
 
-
 solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 
 min = 0
-max = 4
+max = 2
 coordinates_min = (min, min)
 coordinates_max = (max, max)
 mesh = TreeMesh(coordinates_min, coordinates_max,
@@ -32,7 +31,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver,
 
 ###############################################################################
 # ODE solvers, callbacks etc.
-t = 0.5
+t = 0.2
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
@@ -51,7 +50,7 @@ save_solution = SaveSolutionCallback(interval=100,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)
 
-stepsize_callback = StepsizeCallback(cfl=0.5)
+stepsize_callback = StepsizeCallback(cfl=0.9)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
@@ -65,7 +64,7 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
             save_everystep=false, callback=callbacks);
 summary_callback() # print the timer summary
 
-pd = PlotData1D(sol; solution_variables=cons2prim)
+pd = PlotData1D(sol; solution_variables=cons2cons)
 
 #plot(pd.x, pd.data[:,2], xlims = (min, max), label = "2D MS Produktionen = 0 ", title ="vx")
 plot(pd)
