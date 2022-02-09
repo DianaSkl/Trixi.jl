@@ -10,19 +10,17 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   @inline function flux(u, orientation::Integer, equations::PerturbationMomentSystem1D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
   
-  
     @unpack vxr, theta_r = equations
-  
-  
-      f1  = vxr * w0  + sqrt(theta_r) * w0x
-      f2  = vxr * w0x + sqrt(theta_r) * (w0 - w1) + 2.0 * sqrt(theta_r) * w0xx
-      f3  = vxr * w0y + 2.0 * sqrt(theta_r) * w0xy 
-      f4  = vxr * w1 + sqrt(theta_r) * (5.0 * w1x - 2.0 * w0x)/3.0
-      f5  = vxr * w0xx + 2.0 * sqrt(theta_r)* (w0x - w1x)/3.0 
-      f6  = vxr * w0yy + sqrt(theta_r) * (w1x - w0x)/3.0
-      f7  = vxr * w0xy + sqrt(theta_r) * (w0y - w1y)/2.0 
-      f8  = vxr * w1x + sqrt(theta_r) * (w1 - 4.0 * w0xx/5.0)
-      f9  = vxr * w1y - 4.0 * sqrt(theta_r) * w0xy / 5.0
+    
+    f1  = vxr * w0  + sqrt(theta_r) * w0x
+    f2  = vxr * w0x + sqrt(theta_r) * (w0 - w1) + 2.0 * sqrt(theta_r) * w0xx
+    f3  = vxr * w0y + 2.0 * sqrt(theta_r) * w0xy 
+    f4  = vxr * w1 + sqrt(theta_r) * (5.0 * w1x - 2.0 * w0x)/3.0
+    f5  = vxr * w0xx + 2.0 * sqrt(theta_r)* (w0x - w1x)/3.0 
+    f6  = vxr * w0yy + sqrt(theta_r) * (w1x - w0x)/3.0 
+    f7  = vxr * w0xy + sqrt(theta_r) * (w0y - w1y)/2.0 
+    f8  = vxr * w1x + sqrt(theta_r) * (w1 - 4.0 * w0xx/5.0) 
+    f9  = vxr * w1y - 4.0 * sqrt(theta_r) * w0xy / 5.0 
     
     return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
   end
@@ -32,11 +30,9 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
     @unpack vxr, theta_r = equations
   
-  
     rho_r = 2.0
     vyr = 0.0
   
-    
     rho = w0 * rho_r
     v_x = vxr + w0x * sqrt(theta_r) / w0
     v_y = vyr + w0y * sqrt(theta_r) / w0
@@ -48,7 +44,6 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     # q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0 - (2*w0xy*w0y*sqrt(theta_r)^3*rho_r)/w0 + (w0x*w0y^2*sqrt(theta_r)^3 * rho_r)/w0^2 + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
     # q_y = - (2*w0x * w0xy * sqrt(theta_r)^3*rho_r)/w0 + (w0x^2 * w0y * sqrt(theta_r)^3 * rho_r)/w0^2 + (w0y^3*sqrt(theta_r)^3 * rho_r)/w0^2 - (2*w0y *w0yy* sqrt(theta_r)^3 * rho_r)/w0 + (5*w0y*w1*sqrt(theta_r)^3*rho_r)/2*w0 - (5*w1y*sqrt(theta_r)^3*rho_r)/2
   
-    
     return SVector(rho, v_x, theta)
   end
   
@@ -85,7 +80,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     ω = 2 * pi * f
     x1, = x
     ini = c + A * sin(ω * (x[1] - t))
-    r1 = 1000
+    #ini = c + A * sin(ω * (- t))
   
     rho = ini
     rho_r = 2
@@ -101,13 +96,13 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
     #sigma_xx = (ini-2)/r1
     #sigma_xx = A*sin(-ω *t)
-    sigma_xx = A*sin(ω * (x[1] - t))
+    sigma_xx = 0.02
     sigma_xy = 0
     sigma_yy = 0
 
     #q_x = (ini-2)/r1
     #q_x = A*sin(-ω *t)
-    q_x = 0
+    q_x = 1.2
     q_y = 0
   
     w0 = rho/rho_r
@@ -148,7 +143,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     f = 1/L
     ω = 2 * pi * f
     x1, = x
-    ini = c + A * sin(ω * (x[1] - t))
+    
     p1 = 2/3
 
     vx = 1.0
@@ -162,10 +157,8 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     a4 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/15.0 
     a5 = -2.0 * w0 * w1y/3.0 + 2.0 * w1 * w0y/3.0 + 4.0 * w0x * w0xy/15.0 + 4.0 * w0y * w0yy/15.0  
 
-    #a1 = a4 = 0
+    a1 = a4 = 0
    
-  
-    
 
 
     # const
@@ -190,25 +183,6 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     dw1y_x = 0
 
 
-    # periodisch 
-    # dw0_x = (A*ω*cos((x[1]-t)*ω))/c
-    
-    # dw0x_x = (A*dv_x*ω*cos((x[1]-t)*ω))/(c*sqrt(theta_r))
-    
-    # dw0y_x = 0
-
-    #dw1_x = -(A*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r)-(A*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r)-(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c*theta_r)
-    
-    dw0xx_x = (A*dv_x^2*p1*ω*cos((x[1]-t)*ω)+A*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
-
-    # dw0yy_x = -(A*dv_x^2*ω*cos((x[1]-t)*ω))/(6*c*theta_r)
-    
-    # dw0xy_x = 0
-    
-    dw1x_x = -(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)-(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)-(0.2*A*dv_x*ω*cos((x[1]-t)*ω))/theta_r^1.5
-    
-    # dw1y_x = 0
-
 
     f1  = -dw0_x + vxr * dw0_x + sqrt(theta_r) * dw0x_x
     f2  = -dw0x_x + vxr * dw0x_x + sqrt(theta_r) * (dw0_x - dw1_x) + 2.0 * sqrt(theta_r) * dw0xx_x
@@ -220,22 +194,9 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     f8  = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + a4/tau
     f9  = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + a5/tau
 
-
-    # print("a1/tau:")
-    # println(a1/tau)
-    # print("a2/tau:")
-    # println(a2/tau)
    
     return(f1,f2,f3,f4,f5,f6,f7,f8,f9)
   end 
-  
-  
-  function calc_tau(equations::PerturbationMomentSystem1D)
-    @unpack tau = equations
-  
-    return(tau)
-  
-  end
   
   
   function shocktube(x, equations::PerturbationMomentSystem1D)
@@ -247,7 +208,7 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     end
   
     return drho
-  end
+    end
   
   function initial_condition_constant(x, t, equations::PerturbationMomentSystem1D)
   

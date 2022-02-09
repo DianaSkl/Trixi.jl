@@ -49,7 +49,14 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
 
 summary_callback()
 
+# io = open("myfile.txt", "a")
+# print(io, pd.data[:,2])
+# close(io)
 
 pd = PlotData1D(sol; solution_variables=cons2cons)
-#plot(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), label = "Lösung neu", title ="vx")
-plot!(pd)
+#plot(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), title ="vx")
+#plot(pd.x, pd.data[:,1], xlims = (coordinates_min, coordinates_max), title ="w0")
+plot(pd)
+
+
+    

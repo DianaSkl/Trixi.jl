@@ -133,19 +133,17 @@ end
     theta = (gamma-1)*(ini-(vx^2 + vy^2)/2)
     dtheta = theta -  theta_r
 
-    r1 = 100000000
-    r2 = 100000000
   
     #sxx = (ini-2)/r1
     #syy = (ini-2)/r1
     #sxy = (ini-2)/r1
 
-    sxx = 0.0
-    syy = 0.0
-    sxy = 0.0
+    sxx = 0.05
+    syy = 0.05
+    sxy = 0.05
 
-    qx = 0.0
-    qy = 0.0
+    qx = 0.01
+    qy = 0.01
 
     #qx = (ini-2)/r2
     #qy = (ini-2)/r2
@@ -186,8 +184,6 @@ end
     p1 = 2/3
     p2 = 1/3
 
-    r1 = 100000000
-    r2 = 100000000
   
     gamma = 5/3
   
