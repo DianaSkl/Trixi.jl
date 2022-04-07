@@ -9,7 +9,7 @@ tau = 1.5
 vxr = 0.5
 theta_r = 1/3
 rho_r = 2.0
-equations = PerturbationMomentSystem1D(vxr, theta_r, rho_r, tau)
+equations = MomentSystem1D(vxr, theta_r, rho_r, tau)
 initial_condition = initial_condition_convergence_test
 
 
@@ -51,9 +51,5 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
 
 summary_callback()
 
- pd = PlotData1D(sol; solution_variables=cons2prim)
-# plot(pd.x, pd.data[:,2], xlims = (coordinates_min, coordinates_max), title ="vx")
-# plot(pd.x, pd.data[:,1], xlims = (coordinates_min, coordinates_max), title ="rho")
+pd = PlotData1D(sol; solution_variables=cons2prim)
 plot(pd)
-
-
