@@ -18,7 +18,7 @@ solver = DGSEM(polydeg=3, surface_flux=flux_lax_friedrichs)
 coordinates_min = 0
 coordinates_max = 2
 
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=3, n_cells_max=10_000)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=2, n_cells_max=10_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
 ###############################################################################
@@ -40,7 +40,7 @@ save_restart = SaveRestartCallback(interval=100, save_final_restart=true)
 save_solution = SaveSolutionCallback(interval=100, solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-stepsize_callback = StepsizeCallback(cfl=1.5)
+stepsize_callback = StepsizeCallback(cfl=0.8)
 
 callbacks = CallbackSet(summary_callback,analysis_callback, alive_callback, save_restart, save_solution, stepsize_callback)
 

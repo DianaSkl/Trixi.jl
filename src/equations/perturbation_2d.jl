@@ -133,21 +133,13 @@ end
     theta = (gamma-1)*(ini-(vx^2 + vy^2)/2)
     dtheta = theta -  theta_r
 
-  
-    #sxx = (ini-2)/r1
-    #syy = (ini-2)/r1
-    #sxy = (ini-2)/r1
+    sxx = 0.1
+    syy = 0.1
+    sxy = 0.1
 
-    sxx = 0.05
-    syy = 0.05
-    sxy = 0.05
+    qx = 0.1
+    qy = 0.1
 
-    qx = 0.01
-    qy = 0.01
-
-    #qx = (ini-2)/r2
-    #qy = (ini-2)/r2
-   
   
     w0 = rho/rho_r
     w0x = (rho * dvx)/(rho_r * sqrt(theta_r))

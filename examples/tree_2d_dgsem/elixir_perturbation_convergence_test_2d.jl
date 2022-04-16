@@ -4,8 +4,8 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-vxr = 0.1
-vyr = 0.1
+vxr = 0.5
+vyr = 0.5
 theta_r = 1/3
 rho_r = 2.0
 tau = 0.1
@@ -21,7 +21,7 @@ max = 2
 coordinates_min = (min, min)
 coordinates_max = (max, max)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=5,
+                initial_refinement_level=2,
                 n_cells_max=100_000)
 
 
@@ -31,7 +31,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver,
 
 ###############################################################################
 # ODE solvers, callbacks etc.
-t = 0.4
+t = 0.5
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
@@ -50,7 +50,7 @@ save_solution = SaveSolutionCallback(interval=100,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)
 
-stepsize_callback = StepsizeCallback(cfl=0.9)
+stepsize_callback = StepsizeCallback(cfl=0.8)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
@@ -64,7 +64,7 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
             save_everystep=false, callback=callbacks);
 summary_callback() # print the timer summary
 
-pd = PlotData1D(sol; solution_variables=cons2cons)
+pd = PlotData1D(sol; solution_variables=cons2prim)
 
 #plot(pd.x, pd.data[:,2], xlims = (min, max), label = "2D MS Produktionen = 0 ", title ="vx")
 plot(pd)

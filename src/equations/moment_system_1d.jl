@@ -61,6 +61,10 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
     return ab1
   end
   
+  @inline function density_pressure(u, equations::PerturbationMomentSystem1D)
+    rho = 1.0
+    return rho
+  end
    
   function initial_condition_convergence_test(x, t, equations::MomentSystem1D)
     
@@ -72,7 +76,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
     ω = 2 * pi * f
   
     ini = c + A * sin(ω * (x[1] - t))
-
+    #ini = c + A * sin(ω * (- t))
     rho = ini
   
     vx = 1.0
@@ -94,29 +98,52 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
   end
   
   @inline function source_terms_convergence_test(u, x, t, equations::MomentSystem1D)
+        
+   #zeit und ort
+   #f1,f2,f3,f4,f5 = source_spatialtime(u, x, t, equations::MomentSystem1D)
+
+   #nur Zeit
+   #f1,f2,f3,f4,f5 = source_time(u, x, t, equations::MomentSystem1D)
+
+   #produktionen
+   f1,f2,f3,f4,f5 = source_productions(u, x, t, equations::MomentSystem1D)
+   
+
+    return(f1,f2,f3,f4,f5)
+  end 
+
+
+  @inline function source_productions(u, x, t, equations::MomentSystem1D)
+
+    @unpack tau = equations 
+    w0, w0x, w1, w0xx, w1x = u
+  
+    a1 = -w0 * w0xx + w0x * w0x/3.0
+    a2 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0
+    a1 = a2 = 0 
+
+    return (0,0,0,a1/tau,a2/tau)
+  end 
+
+
+
+  @inline function source_spatialtime(u, x, t, equations::MomentSystem1D)
     
     @unpack vxr, theta_r, rho_r, tau = equations 
+
     c = 2
     A = 0.1
     L = 2
     f = 1/L
     ω = 2 * pi * f
-    
+      
     p1 = 2/3
     p2 = 1/3
 
     stheta = sqrt(theta_r)
-
     vx = 1.0
     dv_x = vx - vxr
 
-    w0, w0x, w1, w0xx, w1x = u
-  
-    a1 = -w0 * w0xx + w0x * w0x/3.0
-    a2 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0 
-  
-    
-   
     dw0_x = (A*ω*cos((x[1]-t)*ω))/c
     
     dw0x_x = (A*dv_x*ω*cos((x[1]-t)*ω))/(c*sqrt(theta_r))
@@ -134,6 +161,141 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
     f4  = -dw0xx_x + vxr * dw0xx_x + 2.0 * stheta * (dw0x_x - dw1x_x)/3.0 
     f5  = -dw1x_x + vxr * dw1x_x + stheta * (dw1_x - 4.0 * dw0xx_x/5.0) 
 
+   return (f1,f2,f3,f4,f5)
+  end
 
-    return(f1,f2,f3,f4,f5)
-  end 
+  @inline function source_time(u, x, t, equations::MomentSystem1D)
+
+    @unpack vxr, theta_r, rho_r, tau = equations 
+
+    c = 2
+    A = 0.1
+    L = 2
+    f = 1/L
+    ω = 2 * pi * f
+      
+    p1 = 2/3
+    p2 = 1/3
+
+    vx = 1.0
+    dv_x = vx - vxr
+
+    dw0_t = -(A*ω*cos((-t)*ω))/c
+    
+    dw0x_t = -(A*dv_x*ω*cos((-t)*ω))/(c*sqrt(theta_r))
+
+    dw1_t =-(-(A*ω*cos((-t)*ω)*(p1*(A*sin((-t)*ω)+c)-theta_r-p2))/(c*theta_r)-(A*p1*ω*cos((-t)*ω)*(A*sin((-t)*ω)+c))/(c*theta_r)-(A*dv_x^2*ω*cos((-t)*ω))/(3*c*theta_r))
+    
+    dw0xx_t = -(A*dv_x^2*p1*ω*cos((-t)*ω))/(c^2*theta_r)
+
+    dw1x_t =-(-(A*dv_x*ω*cos((-t)*ω)*(p1*(A*sin((-t)*ω)+c)-theta_r-p2))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((-t)*ω)*(A*sin((-t)*ω)+c))/(c*theta_r^1.5)-(A*dv_x^3*ω*cos((-t)*ω))/(5*c*theta_r^1.5))
+    
+
+    f1  = dw0_t 
+    f2  = dw0x_t 
+    f3  = dw1_t 
+    f4  = dw0xx_t 
+    f5  = dw1x_t 
+
+
+    return (f1,f2,f3,f4,f5)
+  end
+
+  function initial_condition_constant(x, t, equations::MomentSystem1D)
+  
+    return SVector(init_w0(x, t, equations::MomentSystem1D), 
+                   init_w0x(x, t, equations::MomentSystem1D), 
+                   init_w1(x, t, equations::MomentSystem1D),
+                   init_w0xx(x, t, equations::MomentSystem1D),
+                   init_w1x(x, t, equations::MomentSystem1D))
+  end
+
+  function shocktube(x, equations::MomentSystem1D)
+    @unpack rho_r = equations 
+    if (x[1] < 0)
+      drho = 3 - rho_r
+    else
+      drho = 1 - rho_r
+    end
+  
+    return drho
+    end
+  
+  
+  @inline function init_w0(x, t, equations::MomentSystem1D)
+    @unpack rho_r = equations 
+  
+    drho = shocktube(x, equations)
+    w0 = 1 + drho / rho_r
+    
+   return w0
+  end
+  
+  
+  @inline function init_w0x(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r, rho_r = equations 
+  
+ 
+    drho = shocktube(x, equations)
+  
+    dv_x = 0
+    
+    w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
+  
+   return w0x
+  end
+  
+
+  
+  @inline function init_w1(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r = equations 
+    rho_r = 1
+    drho = shocktube(x, equations)
+    dv_y = 0
+    dv_x = 0
+    dtheta = 0
+    rho = 1 
+    w1 = - (rho * (dv_x *dv_x + dv_y * dv_y) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
+    
+   return w1
+  end
+  
+  
+  @inline function init_w0xx(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r, rho_r = equations 
+  
+    drho = shocktube(x, equations)
+    dv_y = 0
+    dv_x = 0
+  
+    sigma_xx = 0
+    
+    w0xx = 0.5 * sigma_xx/(rho_r * theta_r) + (2.0 * dv_x * dv_x - dv_y * dv_y)/(6.0 * theta_r) + (2.0 * drho * dv_x * dv_x - drho * dv_y * dv_y)/(6.0 * rho_r * theta_r)  
+    
+   return w0xx
+  end
+    
+   
+  
+  @inline function init_w1x(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r, rho_r = equations 
+    drho = shocktube(x, equations)
+    dv_y = 0
+    dv_x = 0
+    sigma_xy = 0
+    sigma_xx = 0
+    q_x = 0
+  
+    dtheta = 0
+    rho = 1
+  
+    w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x + sigma_xy * dv_y))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x * dv_y^2 + dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
+    
+   return w1x
+  end
+  
+  
