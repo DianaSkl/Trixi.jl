@@ -6,8 +6,8 @@ struct MomentSystem1D{RealT<:Real} <: AbstractMomentSystem{1, 5}
   end
 
   
-varnames(::typeof(cons2prim), ::MomentSystem1D) = ("rho", "vx", "theta")
-varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w1x" )
+varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p")
+varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u207D\u2070\u207E\u2093", "w\u207D\u00B9\u207E", "w\u207D\u2070\u207E\u2093\u2093", "w\u207D\u00B9\u207E\u2093" )
 
   
 @inline function flux(u, orientation::Integer, equations::MomentSystem1D)
@@ -27,17 +27,16 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
 
   
   @inline function cons2prim(prim, equations::MomentSystem1D)
-    w0, w0x, w1 = prim
+    w0, w0x, w1, w0xx, w1x = prim
     @unpack vxr, theta_r, rho_r = equations
-  
-    vx = 1.0 
-
-    dvx = vx - vxr
+   
     rho = w0 * rho_r
     vx = vxr + w0x * sqrt(theta_r) / w0
-    theta = theta_r*(1- w1/w0)- dvx^2/3
-    
-    return SVector(rho, vx, theta)
+    theta = theta_r - (w0x^2 * theta_r)/(3 * w0^2) -  (w1 * theta_r)/ w0
+    p = rho*theta
+    sigmax = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r
+    qx = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0  + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
+    return SVector(rho, vx, p)
   end
   
     
@@ -61,7 +60,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
     return ab1
   end
   
-  @inline function density_pressure(u, equations::PerturbationMomentSystem1D)
+  @inline function density_pressure(u, equations::MomentSystem1D)
     rho = 1.0
     return rho
   end
@@ -115,12 +114,19 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
 
   @inline function source_productions(u, x, t, equations::MomentSystem1D)
 
-    @unpack tau = equations 
+    @unpack theta_r, rho_r, tau = equations 
     w0, w0x, w1, w0xx, w1x = u
   
     a1 = -w0 * w0xx + w0x * w0x/3.0
     a2 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0
-    a1 = a2 = 0 
+  
+    #Alternativ wie im Paper:
+    sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r
+    q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0   + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
+    
+    #a1 = - sigma_xx/(rho_r * theta_r)
+    #a2 = - 2*q_x/(3*rho_r*sqrt(theta_r^3))
+ 
 
     return (0,0,0,a1/tau,a2/tau)
   end 
@@ -210,7 +216,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
                    init_w1x(x, t, equations::MomentSystem1D))
   end
 
-  function shocktube(x, equations::MomentSystem1D)
+  function shocktube_density(x, equations::MomentSystem1D)
     @unpack rho_r = equations 
     if (x[1] < 0)
       drho = 3 - rho_r
@@ -220,14 +226,24 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
   
     return drho
     end
+
+    function shocktube_temp(x, equations::MomentSystem1D)
+      @unpack theta_r = equations 
+      if (x[1] < 0)
+        dtheta = 1.0 - theta_r 
+      else
+        dtheta = 1.0 - theta_r
+      end
+    
+      return dtheta
+      end
   
   
   @inline function init_w0(x, t, equations::MomentSystem1D)
     @unpack rho_r = equations 
   
-    drho = shocktube(x, equations)
+    drho = shocktube_density(x, equations)
     w0 = 1 + drho / rho_r
-    
    return w0
   end
   
@@ -237,7 +253,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
     @unpack theta_r, rho_r = equations 
   
  
-    drho = shocktube(x, equations)
+    drho = shocktube_density(x, equations)
   
     dv_x = 0
     
@@ -250,12 +266,11 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
   
   @inline function init_w1(x, t, equations::MomentSystem1D)
     
-    @unpack theta_r = equations 
-    rho_r = 1
-    drho = shocktube(x, equations)
+    @unpack theta_r, rho_r = equations 
+    drho = shocktube_density(x, equations)
     dv_y = 0
     dv_x = 0
-    dtheta = 0
+    dtheta = shocktube_temp(x, equations)
     rho = 1 
     w1 = - (rho * (dv_x *dv_x + dv_y * dv_y) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
     
@@ -267,7 +282,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
     
     @unpack theta_r, rho_r = equations 
   
-    drho = shocktube(x, equations)
+    drho = shocktube_density(x, equations)
     dv_y = 0
     dv_x = 0
   
@@ -283,18 +298,18 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1", "w0xx", "w
   @inline function init_w1x(x, t, equations::MomentSystem1D)
     
     @unpack theta_r, rho_r = equations 
-    drho = shocktube(x, equations)
+  
     dv_y = 0
     dv_x = 0
     sigma_xy = 0
     sigma_xx = 0
     q_x = 0
   
-    dtheta = 0
+    dtheta = shocktube_temp(x, equations)
     rho = 1
   
     w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x + sigma_xy * dv_y))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x * dv_y^2 + dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
-    
+  
    return w1x
   end
   

@@ -65,3 +65,4 @@ x2 = LinRange(0,2,128)
 
 plot(x, w0_prim0, seriestype = :scatter)
 plot!(x2, w0_final, seriestype = :scatter)
+

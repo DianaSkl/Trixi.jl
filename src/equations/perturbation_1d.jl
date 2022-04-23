@@ -13,15 +13,16 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   
     @unpack vxr, theta_r = equations
     
+        
     f1  = vxr * w0  + sqrt(theta_r) * w0x
     f2  = vxr * w0x + sqrt(theta_r) * (w0 - w1) + 2.0 * sqrt(theta_r) * w0xx
     f3  = vxr * w0y + 2.0 * sqrt(theta_r) * w0xy 
     f4  = vxr * w1 + sqrt(theta_r) * (5.0 * w1x - 2.0 * w0x)/3.0
     f5  = vxr * w0xx + 2.0 * sqrt(theta_r)* (w0x - w1x)/3.0 
-    f6  = vxr * w0yy + sqrt(theta_r) * (w1x - w0x)/3.0 
+    f6  = vxr * w0yy + sqrt(theta_r) * (w1x - w0x)/3.0
     f7  = vxr * w0xy + sqrt(theta_r) * (w0y - w1y)/2.0 
-    f8  = vxr * w1x + sqrt(theta_r) * (w1 - 4.0 * w0xx/5.0) 
-    f9  = vxr * w1y - 4.0 * sqrt(theta_r) * w0xy / 5.0 
+    f8  = vxr * w1x + sqrt(theta_r) * (w1 - 4.0 * w0xx/5.0)
+    f9  = vxr * w1y - 4.0 * sqrt(theta_r) * w0xy / 5.0
     
     return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
   end
@@ -45,7 +46,8 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
     # q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0 - (2*w0xy*w0y*sqrt(theta_r)^3*rho_r)/w0 + (w0x*w0y^2*sqrt(theta_r)^3 * rho_r)/w0^2 + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
     # q_y = - (2*w0x * w0xy * sqrt(theta_r)^3*rho_r)/w0 + (w0x^2 * w0y * sqrt(theta_r)^3 * rho_r)/w0^2 + (w0y^3*sqrt(theta_r)^3 * rho_r)/w0^2 - (2*w0y *w0yy* sqrt(theta_r)^3 * rho_r)/w0 + (5*w0y*w1*sqrt(theta_r)^3*rho_r)/2*w0 - (5*w1y*sqrt(theta_r)^3*rho_r)/2
   
-    return SVector(rho, v_x, theta)
+    p = rho*theta
+    return SVector(rho, v_x, p)
   end
   
   
@@ -119,88 +121,88 @@ struct PerturbationMomentSystem1D{RealT<:Real} <: AbstractPerturbationMomentSyst
   end
   
   
-  # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
-  #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-
-  
-  #   du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-  #   du2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-  #   du3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-  #   du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-  #   du5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
-      
-  #   return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
-  
-  # end
-  
-  
   @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
-    
-    @unpack vxr, theta_r, rho_r, tau = equations 
-    c = 2
-    A = 0.1
-    L = 2
-    f = 1/L
-    ω = 2 * pi * f
-    x1, = x
-    
-    p1 = 2/3
-
-    vx = 1.0
-    dv_x = vx - vxr
-    dv_y = 0
-
-
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
+    @unpack tau = equations 
   
-    a1 = -w0 * w0xx + w0x * w0x/3.0 - w0y * w0y/6.0 
-    a2 = -w0 * w0yy - w0x * w0x/6.0 + w0y * w0y/3.0
-    a3 = -w0 * w0xy + w0x * w0y/4.0 + w0y * w0x/4.0
-    a4 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/15.0 
-    a5 = -2.0 * w0 * w1y/3.0 + 2.0 * w1 * w0y/3.0 + 4.0 * w0x * w0xy/15.0 + 4.0 * w0y * w0yy/15.0  
+    du1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
+    du2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+    du3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
+    du4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
+    du5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
+      
+    return SVector(0.0, 0.0, 0.0, 0.0, du1/tau, du2/tau, du3/tau, du4/tau, du5/tau)
+  
+  end
+  
+  
+  # @inline function source_terms_convergence_test(u, x, t, equations::PerturbationMomentSystem1D)
+    
+  #   @unpack vxr, theta_r, rho_r, tau = equations 
+  #   c = 2
+  #   A = 0.1
+  #   L = 2
+  #   f = 1/L
+  #   ω = 2 * pi * f
+  #   x1, = x
+    
+  #   p1 = 2/3
+
+  #   vx = 1.0
+  #   dv_x = vx - vxr
+  #   dv_y = 0
+
+
+  #   w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
+  
+  #   a1 = -w0 * w0xx + w0x * w0x/3.0 - w0y * w0y/6.0 
+  #   a2 = -w0 * w0yy - w0x * w0x/6.0 + w0y * w0y/3.0
+  #   a3 = -w0 * w0xy + w0x * w0y/4.0 + w0y * w0x/4.0
+  #   a4 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/15.0 
+  #   a5 = -2.0 * w0 * w1y/3.0 + 2.0 * w1 * w0y/3.0 + 4.0 * w0x * w0xy/15.0 + 4.0 * w0y * w0yy/15.0  
 
 
     
-    a1 = a4 = 0
+  #   a1 = a4 = 0
    
 
 
-    # const
-    dw0_x = (A*ω*cos((x[1]-t)*ω))/c
+  #   # const
+  #   dw0_x = (A*ω*cos((x[1]-t)*ω))/c
     
-    dw0x_x = (A*dv_x*ω*cos((x[1]-t)*ω))/(c*sqrt(theta_r))
+  #   dw0x_x = (A*dv_x*ω*cos((x[1]-t)*ω))/(c*sqrt(theta_r))
     
-    dw0y_x = 0
+  #   dw0y_x = 0
 
-    dw1_x = -(A*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r)-(A*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r)-(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c*theta_r)
+  #   dw1_x = -(A*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r)-(A*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r)-(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c*theta_r)
     
-    dw0xx_x = (A*dv_x^2*p1*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
-    dw0xx_t = (-A*ω*cos(t*ω)-A*dv_x^2*p1*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
+  #   dw0xx_x = (A*dv_x^2*p1*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
+  #   dw0xx_t = (-A*ω*cos(t*ω)-A*dv_x^2*p1*ω*cos((x[1]-t)*ω))/(c^2*theta_r)
     
-    dw0yy_x = -(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c^2*theta_r)
+  #   dw0yy_x = -(A*dv_x^2*ω*cos((x[1]-t)*ω))/(3*c^2*theta_r)
     
-    dw0xy_x = 0
+  #   dw0xy_x = 0
     
-    dw1x_x =-(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)-(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
-    dw1x_t =(0.2*A*dv_x*ω*cos(t*ω))/theta_r^1.5+(0.2*A*ω*cos(t*ω))/theta_r^1.5+(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)+(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)+(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
+  #   dw1x_x =-(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)-(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
+  #   dw1x_t =(0.2*A*dv_x*ω*cos(t*ω))/theta_r^1.5+(0.2*A*ω*cos(t*ω))/theta_r^1.5+(A*dv_x*ω*cos((x[1]-t)*ω)*(p1*(A*sin((x[1]-t)*ω)+c)-1))/(c*theta_r^1.5)+(A*dv_x*p1*ω*cos((x[1]-t)*ω)*(A*sin((x[1]-t)*ω)+c))/(c*theta_r^1.5)+(0.2*A*dv_x^3*ω*cos((x[1]-t)*ω))/(c*theta_r^1.5)
 
-    dw1y_x = 0
+  #   dw1y_x = 0
 
 
 
-    f1  = -dw0_x + vxr * dw0_x + sqrt(theta_r) * dw0x_x
-    f2  = -dw0x_x + vxr * dw0x_x + sqrt(theta_r) * (dw0_x - dw1_x) + 2.0 * sqrt(theta_r) * dw0xx_x
-    f3  = -dw0y_x + vxr * dw0y_x + 2.0 * sqrt(theta_r) * dw0xy_x
-    f4  = -dw1_x + vxr * dw1_x + sqrt(theta_r) * (5.0 * dw1x_x - 2.0 * dw0x_x)/3.0
-    f5  = -dw0xx_x + vxr * dw0xx_x + 2.0 * sqrt(theta_r)* (dw0x_x - dw1x_x)/3.0 + a1/tau
-    f6  = -dw0yy_x + vxr * dw0yy_x + sqrt(theta_r) * (dw1x_x - dw0x_x)/3.0 + a2/tau
-    f7  = -dw0xy_x + vxr * dw0xy_x + sqrt(theta_r) * (dw0y_x - dw1y_x)/2.0 + a3/tau
-    f8  = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + a4/tau
-    f9  = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + a5/tau
+  #   f1  = -dw0_x + vxr * dw0_x + sqrt(theta_r) * dw0x_x
+  #   f2  = -dw0x_x + vxr * dw0x_x + sqrt(theta_r) * (dw0_x - dw1_x) + 2.0 * sqrt(theta_r) * dw0xx_x
+  #   f3  = -dw0y_x + vxr * dw0y_x + 2.0 * sqrt(theta_r) * dw0xy_x
+  #   f4  = -dw1_x + vxr * dw1_x + sqrt(theta_r) * (5.0 * dw1x_x - 2.0 * dw0x_x)/3.0
+  #   f5  = -dw0xx_x + vxr * dw0xx_x + 2.0 * sqrt(theta_r)* (dw0x_x - dw1x_x)/3.0 + a1/tau
+  #   f6  = -dw0yy_x + vxr * dw0yy_x + sqrt(theta_r) * (dw1x_x - dw0x_x)/3.0 + a2/tau
+  #   f7  = -dw0xy_x + vxr * dw0xy_x + sqrt(theta_r) * (dw0y_x - dw1y_x)/2.0 + a3/tau
+  #   f8  = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + a4/tau
+  #   f9  = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + a5/tau
 
    
-    return(f1,f2,f3,f4,f5,f6,f7,f8,f9)
-  end 
+  #   return(f1,f2,f3,f4,f5,f6,f7,f8,f9)
+  # end 
   
   
   function shocktube(x, equations::PerturbationMomentSystem1D)
