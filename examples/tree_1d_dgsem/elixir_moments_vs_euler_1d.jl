@@ -46,7 +46,7 @@ alive_callback = AliveCallback(analysis_interval=analysis_interval)
 save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-stepsize_callback = StepsizeCallback(cfl=0.4)
+stepsize_callback = StepsizeCallback(cfl=0.3)
 
 save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
 
@@ -72,7 +72,7 @@ pde = PlotData1D(sol; solution_variables=cons2prim)
 vxr = 0.0
 theta_r = 1.0
 rho_r = 1.0 
-tau = 0.04
+tau = 0.001
 equations = MomentSystem1D(vxr, theta_r, rho_r, tau)
 
 initial_condition = initial_condition_constant
@@ -138,7 +138,8 @@ pd = PlotData1D(sol; solution_variables=cons2prim)
 
 #plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ = "*string(tau), linewidth = 3, guidefont=font(28))
 #plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
-#plot!(pde.x, pde.data[:,1], xlims = (-1, 1), label = "Euler", seriestype = :scatter, markersize=3)
+
 
 #plot(pd)
-plot(pde)
+#plot!(pde.x, pde.data[:,1], xlims = (-1, 1), label = "Euler 1D", seriestype = :scatter, markersize=3)
+plot(pd.x, pd.data[:,3], label = "Momentensystem 1D", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)

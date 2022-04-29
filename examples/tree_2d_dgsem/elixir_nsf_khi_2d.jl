@@ -8,12 +8,13 @@ using Plots
 vxr = 1.0
 vyr = 0.004
 theta_r = 7.4
+rho_r = 2.0
 tau = 0.02
 
 
-equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, tau)
+equations = MomentSystem2D(vxr, vyr, theta_r, rho:r,tau)
 
-function initial_condition_kelvin_helmholtz_instability(x, t, equations::PerturbationMomentSystem2D)
+function initial_condition_kelvin_helmholtz_instability(x, t, equations::MomentSystem2D)
 
     @unpack vxr, vyr, theta_r = equations
 

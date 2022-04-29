@@ -46,7 +46,7 @@
     
     
     varnames(::typeof(cons2cons), ::EulerEquations2D) = ("rho", "rho_v1", "rho_v2", "rho_e")
-    varnames(::typeof(cons2prim), ::EulerEquations2D) = ("rho", "v1", "v2", "t")
+    varnames(::typeof(cons2prim), ::EulerEquations2D) = ("rho", "v1", "v2", "p")
     
     
     # Set initial conditions at physical location `x` for time `t`
@@ -56,10 +56,17 @@
     A constant initial condition to test free-stream preservation.
     """
     function initial_condition_constant(x, t, equations::EulerEquations2D)
-      rho = 1.0
-      rho_v1 = 0.1
-      rho_v2 = -0.2
-      rho_e = 10.0
+      if (x[1] < 0)
+        rho = 3.0 
+        theta = 1.0
+      else
+        rho = 1.0
+        theta = 1.0
+      end
+      
+      rho_v1 = 0.0
+      rho_v2 = 0.0
+      rho_e = 3.0 * rho*theta / 2.0
       return SVector(rho, rho_v1, rho_v2, rho_e)
     end
     
@@ -123,7 +130,8 @@
       # du3 = (2*ω*cos((x2+x1-t)*ω)*sin((x2+x1-t)*ω)+35*ω*cos((x2+x1-t)*ω))/150
       # du4 = -(ω*cos((x2+x1-t)*ω)*sin((x2+x1-t)*ω)+25*ω*cos((x2+x1-t)*ω))/150
     
-      return SVector(du1, du2, du3, du4)
+      #return SVector(du1, du2, du3, du4)
+      return SVector(0,0,0,0)
     end
     
     
@@ -897,8 +905,8 @@
       v1 = rho_v1 / rho
       v2 = rho_v2 / rho
       p = (equations.gamma - 1) * (rho_e - 0.5 * (rho_v1 * v1 + rho_v2 * v2))
-      t = p/rho
-      return SVector(rho, v1, v2, t)
+   
+      return SVector(rho, v1, v2, p)
     end
     
     

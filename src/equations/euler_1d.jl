@@ -103,7 +103,7 @@
     #                          (γ - 1) * cos((t - x1) * ω) * A * ω) / 2
   
     #return SVector(du1, du2, du3)
-    return(0,0,0)
+    return (0,0,0)
   end
   
   

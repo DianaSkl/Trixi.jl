@@ -25,7 +25,40 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return SVector(f1, f2, f3, f4, f5)
   end
 
+  @inline function flux_shima_etal(u_ll, u_rr, orientation::Integer, equations::MomentSystem1D)
+    @unpack vxr, theta_r, rho_r = equations
+    
+    # Unpack left and right state
+    rho_ll, vx_ll, p_ll = cons2prim(u_ll, equations)
+    rho_rr, vx_rr, p_rr = cons2prim(u_rr, equations)
   
+    # Average each factor of products in flux
+    rho_avg = 1/2 * (rho_ll + rho_rr)
+    vx_avg  = 1/2 * ( vx_ll +  vx_rr)
+    
+    theta_avg = 0.5 * (p_ll/rho_ll + p_rr/rho_rr)
+    kin_avg = 1/2 * (vx_ll*vx_rr)
+  
+    dvx = vx_avg - vxr 
+    dvxs = kin_avg 
+    drho = rho_avg - rho_r
+    dtheta = theta_avg - theta_r 
+    sxx = 0.0
+    qx = 0.0
+  
+    w0 = rho_avg/rho_r
+    w0x = (rho_avg * dvx)/(rho_r * sqrt(theta_r))
+    w1 = -dtheta*rho_avg/(rho_r*theta_r) - (rho_avg*(dvx^2))/(3*rho_r*theta_r)
+    w0xx = (sxx+drho*(dvx^2*2/3))/(2*rho_r*theta_r)+(dvx^2*2/3)/(2*theta_r)
+    w1x =  -2*(qx+ sxx*dvx)/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho_avg)/(rho_r*sqrt(theta_r^3))- (rho_avg*(dvxs*dvx))/(5*sqrt(theta_r^3)*rho_r)
+ 
+    W = SVector(w0, w0x, w1, w0xx, w1x)      
+    f1, f2, f3, f4, f5 = flux(W, orientation, equations)
+         
+    return SVector(f1, f2, f3, f4, f5)
+  end
+  
+
   @inline function cons2prim(prim, equations::MomentSystem1D)
     w0, w0x, w1, w0xx, w1x = prim
     @unpack vxr, theta_r, rho_r = equations
@@ -114,19 +147,20 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
 
   @inline function source_productions(u, x, t, equations::MomentSystem1D)
 
-    @unpack theta_r, rho_r, tau = equations 
+    @unpack vxr, theta_r, rho_r, tau = equations 
     w0, w0x, w1, w0xx, w1x = u
   
     a1 = -w0 * w0xx + w0x * w0x/3.0
     a2 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0
   
     #Alternativ wie im Paper:
-    sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r
-    q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0   + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
-    
-    #a1 = - sigma_xx/(rho_r * theta_r)
-    #a2 = - 2*q_x/(3*rho_r*sqrt(theta_r^3))
- 
+    # sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r
+    # q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0   + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
+    # vx = vxr + w0x * sqrt(theta_r) / w0
+    # dvx = vx - vxr 
+
+    # a1 = - 0.5*sigma_xx/(rho_r * theta_r)
+    # a2 = - 4*q_x/(15*rho_r*sqrt(theta_r^3)) + 2*sigma_xx*dvx/(5*rho_r * theta_r) 
 
     return (0,0,0,a1/tau,a2/tau)
   end 

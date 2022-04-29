@@ -5,14 +5,14 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-vxr = -0.002
-vyr = 0.0
+vxr = 0.1
+vyr = 0.5
 theta_r = 1.18
 rho_r = 1.24
-tau = 0.0001
+tau = 0.01
 
 
-equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
+equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 """
     initial_condition_kelvin_helmholtz_instability(x, t, equations::CompressibleEulerEquations2D)
@@ -22,7 +22,7 @@ A version of the classical Kelvin-Helmholtz instability based on
   of the Euler Equations
   [arXiv: 2102.06017](https://arxiv.org/abs/2102.06017)
 """
-function initial_condition_kelvin_helmholtz_instability(x, t, equations::PerturbationMomentSystem2D)
+function initial_condition_kelvin_helmholtz_instability(x, t, equations::MomentSystem2D)
     @unpack vxr, vyr, theta_r, rho_r, tau = equations
 
     slope = 15
@@ -34,29 +34,17 @@ function initial_condition_kelvin_helmholtz_instability(x, t, equations::Perturb
     p = 1.0
     theta = p/rho
 
-
-
     drho = rho - rho_r
     dv_x = vx - vxr 
     dv_y = vy - vyr 
     dtheta = theta - theta_r
     
-    diff_theta_y = -(0.75*(15*sech(15*x[2]+7.5)^2-15*sech(15*x[2]-7.5)^2))/(0.75*(tanh(15*x[2]+7.5)-tanh(15*x[2]-7.5))+0.5)^2
-    diff_vx_x = 0
-    diff_vx_y = 0.5*(15*sech(15*x[2]+7.5)^2-15*sech(15*x[2]-7.5)^2)
-    diff_vy_x = 0.2*pi*cos(2*pi*x[1])
-    diff_vy_y = 0
-  
-    # sigma_xx = -2*(5*diff_vx_x/3 - diff_vy_y/3)*tau
-    # sigma_yy = -2*(5*diff_vy_y/3 - diff_vx_x/3)*tau
-    # sigma_xy = -2*(diff_vy_x + diff_vx_y - (diff_vx_x + diff_vy_y)/3)*tau
-    sigma_xx = (5*diff_vx_x/3 - diff_vy_y/3)*tau
-    sigma_yy = (5*diff_vy_y/3 - diff_vx_x/3)*tau
-    sigma_xy = (diff_vy_x + diff_vx_y - (diff_vx_x + diff_vy_y)/3)*tau
+    sigma_xx = 0.1
+    sigma_yy = 0.1
+    sigma_xy = 0.1
 
-    q_x = 0
-    #q_y = tau*(-15*diff_theta_y)/(4)
-    q_y = 15*tau*diff_theta_y/4
+    q_x = 0.1
+    q_y = 0.1
    
 
     w0 = 1 + drho / rho_r
@@ -76,7 +64,7 @@ end
 initial_condition = initial_condition_kelvin_helmholtz_instability
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_lax_friedrichs
+volume_flux  = flux_shima_etal
 polydeg = 3
 basis = LobattoLegendreBasis(polydeg)
 
@@ -102,7 +90,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 1.0)
+tspan = (0.0, 0.1)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -117,7 +105,7 @@ save_solution = SaveSolutionCallback(interval=20,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)
 
-stepsize_callback = StepsizeCallback(cfl=0.4)
+stepsize_callback = StepsizeCallback(cfl=0.3)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
@@ -139,4 +127,4 @@ summary_callback() # print the timer summary
 
 pdt1 = PlotData1D(sol; solution_variables=cons2prim)
 pdt2 = PlotData2D(sol; solution_variables=cons2prim)
-plot(pdt2)
+plot(pdt1)
