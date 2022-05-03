@@ -91,6 +91,35 @@ end
 
 end
 
+@inline function flux_kennedy_gruber(u_ll, u_rr, orientation::Integer, equations::MomentSystem2D)
+
+  @unpack vxr, vyr, theta_r, rho_r = equations
+
+  # Unpack left and right state
+  rho_ll, vx_ll, vy_ll, p_ll = cons2prim(u_ll, equations)
+  rho_rr, vx_rr, vy_rr, p_rr = cons2prim(u_rr, equations)
+  theta_ll = p_ll/rho_ll
+  theta_rr = p_rr/rho_rr
+
+  # Average each factor of products in flux
+  rho_avg = 1/2 * (rho_ll + rho_rr)
+  vx_avg  = 1/2 * (vx_ll +  vx_rr)
+  vy_avg  = 1/2 * (vy_ll +  vy_rr)
+  theta_avg = 1/2 * (theta_ll + theta_rr)
+
+
+  dvx = vx_avg - vxr 
+  dvy = vy_avg - vyr 
+  dtheta = theta_avg - theta_r
+  sxx = sxy = syy = qx = qy = 0.0
+
+
+  W = SVector(prim2cons((rho_avg, vx_avg, vy_avg, theta_avg),equations))      
+  f1, f2, f3, f4, f5, f6, f7, f8, f9 = flux(W, orientation, equations)
+       
+  return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
+end
+
 @inline function flux_shima_etal(u_ll, u_rr, orientation::Integer, equations::MomentSystem2D)
   @unpack vxr, vyr, theta_r, rho_r = equations
   
@@ -148,6 +177,29 @@ end
     return SVector(rho, v_x, v_y, p)
 end
   
+@inline function prim2cons(prim, equations::MomentSystem2D)
+  rho, vx, vy, theta = prim
+  @unpack vxr, vyr, theta_r, rho_r = equations
+
+  sxx = sxy = syy = qx = qy = 0.0
+
+  dvx = vx - vxr 
+  dvy = vy - vyr 
+  dtheta = theta - theta_r 
+
+  w0 = rho/rho_r
+  w0x = (rho * dvx)/(rho_r * sqrt(theta_r))
+  w0y = (rho * dvy)/(rho_r * sqrt(theta_r))
+  w1 = -dtheta*rho/(rho_r*theta_r) - (rho*(dvx^2 + dvy^2))/(3*rho_r*theta_r)
+  w0xx = 0.5*sxx/(rho_r*theta_r) + 0.5*(rho*(2*(dvx^2)/3- (dvy^2)/3))/(rho_r*theta_r)
+  w0yy = 0.5*syy/(rho_r*theta_r) + 0.5*(rho*(2*(dvy^2)/3- (dvx^2)/3))/(rho_r*theta_r)
+  w0xy = 0.5*sxy/(rho_r*theta_r) + 0.5*(rho*dvx*dvy)/(rho_r*theta_r)
+  w1x = -2*(qx + sxx*dvx +sxy*dvy)/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho)/(rho_r*sqrt(theta_r^3))- (rho*(dvx^3 + dvx*dvy^2))/(5*sqrt(theta_r^3)*rho_r)
+  w1y = -2*(qy + sxy*dvx *syy*dvy)/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvy*rho)/(rho_r*sqrt(theta_r^3))- (rho*(dvx^2*dvy + dvy^3))/(5*sqrt(theta_r^3)*rho_r)
+
+  return SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
+end
+
 
   
   

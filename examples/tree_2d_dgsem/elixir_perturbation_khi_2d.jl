@@ -5,13 +5,14 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-vxr = -0.002
-vyr = 0.0
+vxr = 0.2
+vyr = 0.1
 theta_r = 1.18
-tau = 0.01
 rho_r = 1.24
+#für kleineres tau dauert es länger und sieht nicht besser aus!
+tau = 0.00001
 
-equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
+equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 """
     initial_condition_kelvin_helmholtz_instability(x, t, equations::CompressibleEulerEquations2D)
@@ -21,7 +22,7 @@ A version of the classical Kelvin-Helmholtz instability based on
   of the Euler Equations
   [arXiv: 2102.06017](https://arxiv.org/abs/2102.06017)
 """
-function initial_condition_kelvin_helmholtz_instability(x, t, equations::PerturbationMomentSystem2D)
+function initial_condition_kelvin_helmholtz_instability(x, t, equations::MomentSystem2D)
     # change discontinuity to tanh
     # typical resolution 128^2, 256^2
     # domain size is [-1,+1]^2
@@ -40,7 +41,7 @@ end
 initial_condition = initial_condition_kelvin_helmholtz_instability
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_lax_friedrichs
+volume_flux  = flux_kennedy_gruber
 polydeg = 3
 basis = LobattoLegendreBasis(polydeg)
 
@@ -60,14 +61,14 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=5,
+                initial_refinement_level=4,
                 n_cells_max=100_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 0.2)
+tspan = (0.0, 0.9)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()

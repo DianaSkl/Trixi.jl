@@ -58,6 +58,38 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return SVector(f1, f2, f3, f4, f5)
   end
   
+  @inline function flux_kennedy_gruber(u_ll, u_rr, orientation::Integer, equations::MomentSystem1D)
+
+    @unpack vxr, theta_r, rho_r = equations
+
+    # Unpack left and right state
+    rho_ll, vx_ll, p_ll = cons2prim(u_ll, equations)
+    rho_rr, vx_rr, p_rr = cons2prim(u_rr, equations)
+    theta_ll = p_ll/rho_ll
+    theta_rr = p_rr/rho_rr
+  
+    # Average each factor of products in flux
+    rho_avg = 1/2 * (rho_ll + rho_rr)
+    vx_avg  = 1/2 * (vx_ll +  vx_rr)
+    theta_avg = 1/2 * (theta_ll + theta_rr)
+  
+
+    dvx = vx_avg - vxr 
+    dtheta = theta_avg - theta_r
+    sxx = qx = 0.0
+
+    w0 = rho_avg/rho_r
+    w0x = (rho_avg * dvx)/(rho_r * sqrt(theta_r))
+    w1 = -dtheta*rho_avg/(rho_r*theta_r) - (rho_avg*(dvx^2))/(3*rho_r*theta_r)
+    w0xx = 0.5*sxx/(rho_r*theta_r) + 0.5*(rho_avg*2*(dvx^2)/3)/(rho_r*theta_r)
+    w1x =  -2*(qx + sxx*dvx)/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho_avg)/(rho_r*sqrt(theta_r^3))- (rho_avg*(dvx^3))/(5*sqrt(theta_r^3)*rho_r)
+ 
+    W = SVector(w0, w0x, w1, w0xx, w1x)      
+    f1, f2, f3, f4, f5 = flux(W, orientation, equations)
+         
+    return SVector(f1, f2, f3, f4, f5)
+  end
+  
 
   @inline function cons2prim(prim, equations::MomentSystem1D)
     w0, w0x, w1, w0xx, w1x = prim
@@ -147,21 +179,12 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
 
   @inline function source_productions(u, x, t, equations::MomentSystem1D)
 
-    @unpack vxr, theta_r, rho_r, tau = equations 
+    @unpack tau = equations 
     w0, w0x, w1, w0xx, w1x = u
   
     a1 = -w0 * w0xx + w0x * w0x/3.0
     a2 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0
   
-    #Alternativ wie im Paper:
-    # sigma_xx = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r
-    # q_x = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0   + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
-    # vx = vxr + w0x * sqrt(theta_r) / w0
-    # dvx = vx - vxr 
-
-    # a1 = - 0.5*sigma_xx/(rho_r * theta_r)
-    # a2 = - 4*q_x/(15*rho_r*sqrt(theta_r^3)) + 2*sigma_xx*dvx/(5*rho_r * theta_r) 
-
     return (0,0,0,a1/tau,a2/tau)
   end 
 
@@ -302,11 +325,10 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     
     @unpack theta_r, rho_r = equations 
     drho = shocktube_density(x, equations)
-    dv_y = 0
-    dv_x = 0
     dtheta = shocktube_temp(x, equations)
-    rho = 1 
-    w1 = - (rho * (dv_x *dv_x + dv_y * dv_y) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
+    dv_x = 0
+    rho = drho + rho_r 
+    w1 = - (rho * (dv_x *dv_x) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
     
    return w1
   end
@@ -317,12 +339,12 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     @unpack theta_r, rho_r = equations 
   
     drho = shocktube_density(x, equations)
-    dv_y = 0
+    rho = drho + rho_r
     dv_x = 0
   
-    sigma_xx = 0
+    sigma_xx = 0.0
     
-    w0xx = 0.5 * sigma_xx/(rho_r * theta_r) + (2.0 * dv_x * dv_x - dv_y * dv_y)/(6.0 * theta_r) + (2.0 * drho * dv_x * dv_x - drho * dv_y * dv_y)/(6.0 * rho_r * theta_r)  
+    w0xx = 0.5 * sigma_xx/(rho_r * theta_r) + (rho* dv_x * dv_x)/(3 * rho_r*theta_r) 
     
    return w0xx
   end
@@ -332,17 +354,16 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
   @inline function init_w1x(x, t, equations::MomentSystem1D)
     
     @unpack theta_r, rho_r = equations 
-  
-    dv_y = 0
+
     dv_x = 0
-    sigma_xy = 0
-    sigma_xx = 0
-    q_x = 0
+    sigma_xx = 0.0
+    q_x = 0.0
   
     dtheta = shocktube_temp(x, equations)
-    rho = 1
+    drho = shocktube_density(x, equations)
+    rho = drho + rho_r
   
-    w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x + sigma_xy * dv_y))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x * dv_y^2 + dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
+    w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
   
    return w1x
   end

@@ -64,7 +64,7 @@ end
 initial_condition = initial_condition_kelvin_helmholtz_instability
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_shima_etal
+volume_flux  = flux_kennedy_gruber
 polydeg = 3
 basis = LobattoLegendreBasis(polydeg)
 
@@ -90,7 +90,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 0.1)
+tspan = (0.0, 0.4)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -116,10 +116,10 @@ callbacks = CallbackSet(summary_callback,
 ###############################################################################
 # run the simulation
 
-# sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
-#             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
-#             save_everystep=false, callback=callbacks);
-sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
+sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
+            dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
+            save_everystep=false, callback=callbacks);
+#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
 
 
 summary_callback() # print the timer summary
@@ -127,4 +127,4 @@ summary_callback() # print the timer summary
 
 pdt1 = PlotData1D(sol; solution_variables=cons2prim)
 pdt2 = PlotData2D(sol; solution_variables=cons2prim)
-plot(pdt1)
+plot!(pdt1)

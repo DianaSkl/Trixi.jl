@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.4
+t = 0.3
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 ###############################################################################
@@ -16,7 +16,7 @@ boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_shima_etal
+volume_flux  = flux_kennedy_gruber
 
 basis = LobattoLegendreBasis(3)                                  
 volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
@@ -82,7 +82,7 @@ boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_shima_etal
+volume_flux  = flux_kennedy_gruber
 basis = LobattoLegendreBasis(3)
 
 
@@ -137,9 +137,9 @@ pd = PlotData1D(sol; solution_variables=cons2prim)
 
 
 #plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ = "*string(tau), linewidth = 3, guidefont=font(28))
-plot!(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
+plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
 
 
 #plot!(pd, label = "Momente")
-#plot!(pde.x, pde.data[:,1], xlims = (-1, 1), label = "Euler 1D", seriestype = :scatter, markersize=3)
+plot!(pde.x, pde.data[:,1], xlims = (-1, 1), label = "Euler 1D", seriestype = :scatter, markersize=3)
 # plot(pd.x, pd.data[:,3], label = "Momentensystem 1D", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)

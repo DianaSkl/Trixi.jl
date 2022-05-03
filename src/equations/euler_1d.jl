@@ -261,27 +261,27 @@
   
   
   # Calculate 1D flux for a single point
-  # @inline function flux(u, orientation::Integer, equations::EulerEquations1D)
-  #   rho, rho_v1, rho_e = u
-  #   v1 = rho_v1 / rho
-  #   p = (equations.gamma - 1) * (rho_e - 0.5 * rho_v1 * v1)
-  #   # Ignore orientation since it is always "1" in 1D
-  #   f1 = rho_v1
-  #   f2 = rho_v1 * v1 + p
-  #   f3 = (rho_e + p) * v1
-  #   return SVector(f1, f2, f3)
-  # end
-  
   @inline function flux(u, orientation::Integer, equations::EulerEquations1D)
     rho, rho_v1, rho_e = u
     v1 = rho_v1 / rho
     p = (equations.gamma - 1) * (rho_e - 0.5 * rho_v1 * v1)
     # Ignore orientation since it is always "1" in 1D
     f1 = rho_v1
-    f2 = rho_v1 * v1 + 2*rho_e/3 - rho_v1 * v1/3
-    f3 = (rho_e*5/3 - rho*v1^2/3 ) * v1
+    f2 = rho_v1 * v1 + p
+    f3 = (rho_e + p) * v1
     return SVector(f1, f2, f3)
   end
+  
+  # @inline function flux(u, orientation::Integer, equations::EulerEquations1D)
+  #   rho, rho_v1, rho_e = u
+  #   v1 = rho_v1 / rho
+  #   p = (equations.gamma - 1) * (rho_e - 0.5 * rho_v1 * v1)
+  #   # Ignore orientation since it is always "1" in 1D
+  #   f1 = rho_v1
+  #   f2 = rho_v1 * v1 + 2*rho_e/3 - rho_v1 * v1/3
+  #   f3 = (rho_e*5/3 - rho*v1^2/3 ) * v1
+  #   return SVector(f1, f2, f3)
+  # end
   
   
   """

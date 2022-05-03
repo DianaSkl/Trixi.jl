@@ -4,7 +4,7 @@ using Plots
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
-gamma = 1.4
+gamma = 5/3
 equations = EulerEquations2D(gamma)
 
 """
@@ -32,7 +32,7 @@ end
 initial_condition = initial_condition_kelvin_helmholtz_instability
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_ranocha
+volume_flux  = flux_kennedy_gruber
 polydeg = 3
 basis = LobattoLegendreBasis(polydeg)
 indicator_sc = IndicatorHennemannGassner(equations, basis,
@@ -55,7 +55,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 0.4)
+tspan = (0.0, 0.3)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -88,4 +88,4 @@ summary_callback() # print the timer summary
 
 pd2 = PlotData2D(sol; solution_variables=cons2prim)
 pe = PlotData1D(sol; solution_variables=cons2prim)
-plot!(pe)
+plot(pd2)
