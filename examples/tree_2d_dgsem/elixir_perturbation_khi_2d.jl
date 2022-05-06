@@ -2,7 +2,6 @@ using OrdinaryDiffEq
 using Trixi
 using Plots 
 
-
 ###############################################################################
 # semidiscretization of the compressible Euler equations
 vxr = 0.2
@@ -10,8 +9,7 @@ vyr = 0.1
 theta_r = 1.18
 rho_r = 1.24
 #für kleineres tau dauert es länger und sieht nicht besser aus!
-tau = 0.00001
-
+tau = 0.001
 equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 """
@@ -33,8 +31,7 @@ function initial_condition_kelvin_helmholtz_instability(x, t, equations::MomentS
     vx = 0.5 * (B - 1)
     vy = 0.1 * sin(2 * pi * x[1])
     p = 1.0
-    theta = p/rho
-    return prim2cons(SVector(rho, vx, vy, theta), equations)
+    return prim2cons(SVector(rho, vx, vy, p), equations)
 end
   
 
@@ -55,20 +52,20 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_dg=volume_flux,
                                                  volume_flux_fv=surface_flux)
 
-volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
+#volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=4,
-                n_cells_max=100_000)
+                initial_refinement_level=3,
+                n_cells_max=400_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 0.9)
+tspan = (0.0, 2.5)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -97,7 +94,7 @@ callbacks = CallbackSet(summary_callback,
 # sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
 #             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
 #             save_everystep=false, callback=callbacks);
-sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
+sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks,maxiters=1e6);
 
 
 summary_callback() # print the timer summary
@@ -107,6 +104,9 @@ summary_callback() # print the timer summary
 
 pdt1 = PlotData1D(sol; solution_variables=cons2prim)
 pdt2 = PlotData2D(sol; solution_variables=cons2prim)
-plot(pdt2)
-#plot!(pdt1.x, pdt1.data[:,1], xlims = (-1.0, 1.0),  title ="rho")
-#label = "MS rho_r= 2",*string(theta_r)
+plot(pdt2, size = (1900,1200), xaxis=false, titlefontsize = 21, tickfontsize=12)
+
+# plot(pdt2["ρ"], title = "ρ")
+# plot(pdt2["v1"], title = L"v_x")
+# plot(pdt2["v2"], title = L"v_y")
+# plot(pdt2["p"], title = L"p")

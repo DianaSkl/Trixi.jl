@@ -55,7 +55,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 0.3)
+tspan = (0.0, 1.0)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -88,4 +88,5 @@ summary_callback() # print the timer summary
 
 pd2 = PlotData2D(sol; solution_variables=cons2prim)
 pe = PlotData1D(sol; solution_variables=cons2prim)
+
 plot(pd2)

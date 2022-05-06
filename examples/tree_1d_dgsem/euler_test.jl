@@ -92,7 +92,6 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 
 
 
-
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=5, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 

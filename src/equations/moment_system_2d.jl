@@ -6,7 +6,7 @@ struct MomentSystem2D{RealT<:Real} <: AbstractMomentSystem{2, 9}
     tau::RealT
 end
 
-varnames(::typeof(cons2prim), ::MomentSystem2D) = ("rho", "v1", "v2", "p")
+varnames(::typeof(cons2prim), ::MomentSystem2D) = ("ρ", "vx", "σxx", "p", "vy", "σyy", "qx", "qy","σxy")
 varnames(::typeof(cons2cons), ::MomentSystem2D) = ("w0", "w0x", "w0y", "w1", "w0xx", "w0yy", "w0xy", "w1x", "w1y")
   
 @inline function flux(u, orientation::Integer, equations::MomentSystem2D)
@@ -44,60 +44,22 @@ varnames(::typeof(cons2cons), ::MomentSystem2D) = ("w0", "w0x", "w0y", "w1", "w0
 end
   
 
-@inline function flux_ranocha(u_ll, u_rr, orientation::Integer,  equations::MomentSystem2D)
-
-  @unpack vxr, vyr, theta_r, rho_r = equations
-
-  rho_ll, vx_ll, vy_ll, p_ll = cons2prim(u_ll, equations)
-  rho_rr, vx_rr, vy_rr, p_rr = cons2prim(u_rr, equations)
-
-  rho_mean = ln_mean(rho_ll, rho_rr)
-
-  #inv_rho_p_mean = p_ll * p_rr * inv_ln_mean(rho_ll * p_rr, rho_rr * p_ll)
-  vx_avg = 0.5 * (vx_ll + vx_rr)
-  vy_avg = 0.5 * (vy_ll + vy_rr)
-  velocity_square_avg = 0.5 * (vx_ll*vx_rr + vy_ll*vy_rr)
-
-
-  dvx = vx_avg - vxr 
-  dvy = vy_avg - vyr 
-  drho = rho_mean - rho_r
-  theta_avg = 0.5 * (p_ll/rho_ll + p_rr/rho_rr)
-  dtheta = theta_avg - theta_r 
-  sxx = 0
-  sxy = 0 
-  syy = 0
-  qx = qy = 0
-
-  gamma = 1.4
-  #rhoe = (1/(1-gamma))*rho_mean*inv_rho_p_mean + rho_mean*velocity_square_avg
-  #thetas = (gamma-1)*(rhoe/rho_mean - 0.5*velocity_square_avg)
-  #dthetas = thetas - theta_r
-
-  w0 = rho_mean/rho_r
-  w0x = (rho_mean * dvx)/(rho_r * sqrt(theta_r))
-  w0y = (rho_mean * dvy)/(rho_r * sqrt(theta_r))
-  w1 = -dtheta*rho_mean/(rho_r*theta_r) - (rho_mean*(dvx^2 + dvy^2))/(3*rho_r*theta_r)
-  w0xx = (sxx+drho*(dvx^2*2/3 - dvy^2*1/3))/(2*rho_r*theta_r)+(dvx^2*2/3 - dvy^2*1/3)/(2*theta_r)
-  w0yy = syy/(2*rho_r*theta_r)+ (rho_mean*(dvy^2 * 2/3 - dvx^2*1/3))/(2*theta_r*rho_r)
-  w0xy = sxy/(2*rho_r*theta_r) + (dvx*dvy/(2*theta_r)) + drho*dvx*dvy/(2*rho_r*theta_r)
-  w1x =  -2*(qx+ sxx*dvx + sxy*dvy )/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho_mean)/(rho_r*sqrt(theta_r^3))- (rho_mean*(dvx^3+dvx*dvy^2))/(5*sqrt(theta_r^3)*rho_r)
-  w1y =  -2*(qy+ sxy*dvx + syy*dvy )/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvy*rho_mean)/(rho_r*sqrt(theta_r^3))- (rho_mean*(dvy*dvx^2+dvy^3))/(5*sqrt(theta_r^3)*rho_r)
-
-  W = SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)      
-  f1, f2, f3, f4, f5, f6, f7, f8, f9 = flux(W, orientation, equations)
-      
-  return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
-
-end
-
 @inline function flux_kennedy_gruber(u_ll, u_rr, orientation::Integer, equations::MomentSystem2D)
 
   @unpack vxr, vyr, theta_r, rho_r = equations
 
   # Unpack left and right state
-  rho_ll, vx_ll, vy_ll, p_ll = cons2prim(u_ll, equations)
-  rho_rr, vx_rr, vy_rr, p_rr = cons2prim(u_rr, equations)
+  a_ll = cons2prim(u_ll, equations)
+  a_rr = cons2prim(u_rr, equations)
+  rho_ll = a_ll[1]
+  vx_ll = a_ll[2]
+  vy_ll = a_ll[5]
+  p_ll = a_ll[4]
+  rho_rr = a_rr[1]
+  vx_rr = a_rr[2]
+  vy_rr = a_rr[5]
+  p_rr = a_rr[4]
+  
   theta_ll = p_ll/rho_ll
   theta_rr = p_rr/rho_rr
 
@@ -106,85 +68,47 @@ end
   vx_avg  = 1/2 * (vx_ll +  vx_rr)
   vy_avg  = 1/2 * (vy_ll +  vy_rr)
   theta_avg = 1/2 * (theta_ll + theta_rr)
+  p_avg = 1/2 * (p_ll + p_rr)
 
-
-  dvx = vx_avg - vxr 
-  dvy = vy_avg - vyr 
-  dtheta = theta_avg - theta_r
-  sxx = sxy = syy = qx = qy = 0.0
-
-
-  W = SVector(prim2cons((rho_avg, vx_avg, vy_avg, theta_avg),equations))      
+  W = SVector(prim2cons((rho_avg, vx_avg, vy_avg, p_avg ),equations))      
   f1, f2, f3, f4, f5, f6, f7, f8, f9 = flux(W, orientation, equations)
        
   return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
 end
 
-@inline function flux_shima_etal(u_ll, u_rr, orientation::Integer, equations::MomentSystem2D)
-  @unpack vxr, vyr, theta_r, rho_r = equations
-  
-  # Unpack left and right state
-  rho_ll, vx_ll, vy_ll, p_ll = cons2prim(u_ll, equations)
-  rho_rr, vx_rr, vy_rr, p_rr = cons2prim(u_rr, equations)
-
-  # Average each factor of products in flux
-  rho_avg = 1/2 * (rho_ll + rho_rr)
-  vx_avg  = 1/2 * ( vx_ll +  vx_rr)
-  vy_avg  = 1/2 * ( vy_ll +  vy_rr)
-  
-  theta_avg = 0.5 * (p_ll/rho_ll + p_rr/rho_rr)
-  kin_avg = 1/2 * (vx_ll*vx_rr + vy_ll*vy_rr)
-
-  dvx = vx_avg - vxr 
-  dvxs = kin_avg -2*vxr*abs(kin_avg)+vxr^2 
-  dvy = vy_avg - vyr 
-  dvys = kin_avg -2*vyr*abs(kin_avg)+vyr^2 
-  drho = rho_avg - rho_r
-  dtheta = theta_avg - theta_r 
-  sxx = 0.1
-  sxy = 0.1 
-  syy = 0.1
-  qx = qy = 0.1
-
-  w0 = rho_avg/rho_r
-  w0x = (rho_avg * dvx)/(rho_r * sqrt(theta_r))
-  w0y = (rho_avg * dvy)/(rho_r * sqrt(theta_r))
-  w1 = -dtheta*rho_avg/(rho_r*theta_r) - (rho_avg*(dvx^2 + dvy^2))/(3*rho_r*theta_r)
-  w0xx = (sxx+drho*(dvx^2*2/3 - dvy^2*1/3))/(2*rho_r*theta_r)+(dvx^2*2/3 - dvy^2/3)/(2*theta_r)
-  w0yy = syy/(2*rho_r*theta_r)+ (rho_avg*(dvy^2 * 2/3 - dvx^2*1/3))/(2*theta_r*rho_r)
-  w0xy = sxy/(2*rho_r*theta_r) + (dvx*dvy/(2*theta_r)) + drho*dvx*dvy/(2*rho_r*theta_r)
-  w1x =  -2*(qx+ sxx*dvx + sxy*dvy )/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho_avg)/(rho_r*sqrt(theta_r^3))- (rho_avg*(dvxs*dvx+dvx*dvys))/(5*sqrt(theta_r^3)*rho_r)
-  w1y =  -2*(qy+ sxy*dvx + syy*dvy )/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvy*rho_avg)/(rho_r*sqrt(theta_r^3))- (rho_avg*(dvy*dvxs+dvys*dvy))/(5*sqrt(theta_r^3)*rho_r)
-
-  W = SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)      
-  f1, f2, f3, f4, f5, f6, f7, f8, f9 = flux(W, orientation, equations)
-  
-
-  return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
-end
-  
-  
   
 @inline function cons2prim(u, equations::MomentSystem2D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
     @unpack vxr, vyr, theta_r, rho_r = equations
 
     rho = w0 * rho_r
-    v_x = vxr + w0x * sqrt(theta_r) / w0
-    v_y = vyr + w0y * sqrt(theta_r) / w0
+    vx = vxr + w0x * sqrt(theta_r) / w0
+    dvx = vx -vxr
+    vy = vyr + w0y * sqrt(theta_r) / w0
+    dvy = vy - vyr 
     theta = theta_r - (w0x^2 * theta_r)/(3 * w0^2) - (w0y^2 * theta_r)/(3 * w0^2) - (w1 * theta_r)/ w0
+    dtheta = theta -theta_r
     p = rho*theta
-    return SVector(rho, v_x, v_y, p)
+    s3theta = sqrt(theta_r^3)
+
+    sigmaxx = 2*rho_r*theta_r*w0xx - rho*(2*dvx^2 - dvy^2)/3
+    sigmayy = 2*rho_r*theta_r*w0yy - rho*(2*dvy^2 - dvx^2)/3
+    sigmaxy = 2*rho_r*theta_r*w0xy - rho*dvx*dvy
+    qx = -w1x*rho_r*s3theta*5/2 - sigmaxx*dvx - sigmaxy*dvy - dtheta*dvx*rho*5/2 - 2*rho*(dvx^3 + dvx*dvy^2)
+    qy = -w1y*rho_r*s3theta*5/2 - sigmayy*dvy - sigmaxy*dvx - dtheta*dvy*rho*5/2 - 2*rho*(dvy^3 + dvy*dvx^2)
+    
+    return SVector(rho, vx, sigmaxx, p, vy, sigmayy, qx, qy, sigmaxy)
 end
   
 @inline function prim2cons(prim, equations::MomentSystem2D)
-  rho, vx, vy, theta = prim
+  rho, vx, vy, p = prim
   @unpack vxr, vyr, theta_r, rho_r = equations
 
   sxx = sxy = syy = qx = qy = 0.0
 
   dvx = vx - vxr 
   dvy = vy - vyr 
+  theta = p/rho
   dtheta = theta - theta_r 
 
   w0 = rho/rho_r
@@ -230,8 +154,10 @@ end
   end
   
   @inline function density_pressure(u, equations::MomentSystem2D)
-    rho, v_x, v_y, theta = cons2prim(u, equations)
-    rho_times_p = theta * rho^2 
+    a = cons2prim(u, equations)
+    rho = a[1]
+    p = a[4]
+    rho_times_p = rho*p
     return rho_times_p
   end
   
@@ -240,8 +166,7 @@ end
     rho = a[1]
     return rho
   end
-   
-  
+     
   
   function initial_condition_convergence_test(x, t, equations::MomentSystem2D)
     c = 2
