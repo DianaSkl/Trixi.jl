@@ -16,6 +16,8 @@ A version of the classical Kelvin-Helmholtz instability based on
   of the Euler Equations
   [arXiv: 2102.06017](https://arxiv.org/abs/2102.06017)
 """
+
+
 function initial_condition_kelvin_helmholtz_instability(x, t, equations::EulerEquations2D)
   # change discontinuity to tanh
   # typical resolution 128^2, 256^2
@@ -48,14 +50,14 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=4,
+                initial_refinement_level=3,
                 n_cells_max=100_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 1.0)
+tspan = (0.0, 1.5)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -81,12 +83,18 @@ callbacks = CallbackSet(summary_callback,
 ###############################################################################
 # run the simulation
 
-sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
-            dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
-            save_everystep=false, callback=callbacks);
+# sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
+#             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
+#             save_everystep=false, callback=callbacks);
+sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks,maxiters=1e9);
 summary_callback() # print the timer summary
+
+
 
 pd2 = PlotData2D(sol; solution_variables=cons2prim)
 pe = PlotData1D(sol; solution_variables=cons2prim)
 
 plot(pd2)
+
+plot(pd2["rho"], title = "ρe", size = (1000,800))
+

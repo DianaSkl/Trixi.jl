@@ -2,77 +2,76 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.3
+t = 0.4
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 ###############################################################################
 # semidiscretization of the compressible Euler equations
 
-equations = EulerEquations1D(5/3)
+# equations = EulerEquations1D(5/3)
 
-initial_condition = initial_condition_constant
+# initial_condition = initial_condition_constant
 
-boundary_condition = BoundaryConditionDirichlet(initial_condition)
-boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
+# boundary_condition = BoundaryConditionDirichlet(initial_condition)
+# boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
-surface_flux = flux_lax_friedrichs
-volume_flux  = flux_kennedy_gruber
+# surface_flux = flux_lax_friedrichs
+# volume_flux  = flux_lax_friedrichs
 
-basis = LobattoLegendreBasis(3)                                  
-volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
-solver = DGSEM(basis, surface_flux, volume_integral)
-
-
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=4, n_cells_max=10_000, periodicity=false)
-semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
+# basis = LobattoLegendreBasis(3)                                  
+# volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
+# solver = DGSEM(basis, surface_flux, volume_integral)
 
 
-
-tspan = (0.0, t)
-ode = semidiscretize(semi, tspan)
-
-# At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
-# and resets the timers
-summary_callback = SummaryCallback()
-
-analysis_interval = 100
-
-# The AnalysisCallback allows to analyse the solution in regular intervals and prints the results
-analysis_callback = AnalysisCallback(semi, interval=100)
-alive_callback = AliveCallback(analysis_interval=analysis_interval)
-
-
-# The SaveSolutionCallback allows to save the solution to a file in regular intervals
-save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
-
-# The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-stepsize_callback = StepsizeCallback(cfl=0.3)
-
-save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
-
-# Create a CallbackSet to collect all callbacks such that they can be passed to the ODE solver
-callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, save_solution, stepsize_callback, save_restart)
+# mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=4, n_cells_max=10_000, periodicity=false)
+# semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 
 
 
-# ###############################################################################
-# # run the simulation
-# sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
-sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
+# tspan = (0.0, t)
+# ode = semidiscretize(semi, tspan)
 
-summary_callback() # print the timer summary
+# # At the beginning of the main loop, the SummaryCallback prints a summary of the simulation setup
+# # and resets the timers
+# summary_callback = SummaryCallback()
+
+# analysis_interval = 100
+
+# # The AnalysisCallback allows to analyse the solution in regular intervals and prints the results
+# analysis_callback = AnalysisCallback(semi, interval=100)
+# alive_callback = AliveCallback(analysis_interval=analysis_interval)
 
 
-pde = PlotData1D(sol; solution_variables=cons2prim)
+# # The SaveSolutionCallback allows to save the solution to a file in regular intervals
+# save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
+
+# # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
+# stepsize_callback = StepsizeCallback(cfl=0.3)
+
+# save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
+
+# # Create a CallbackSet to collect all callbacks such that they can be passed to the ODE solver
+# callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, save_solution, stepsize_callback, save_restart)
+
+
+
+# # ###############################################################################
+# # # run the simulation
+# # sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
+# sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
+
+# summary_callback() # print the timer summary
+
+
+# pde = PlotData1D(sol; solution_variables=cons2prim)
 #plot(pde, label = "Euler")
 
 ########################### Perturbation System ###################################
 
-
 vxr = 0.0
 theta_r = 1.0
 rho_r = 1.0 
-tau = 0.001
+tau = 0.4
 equations = MomentSystem1D(vxr, theta_r, rho_r, tau)
 
 initial_condition = initial_condition_constant
@@ -82,17 +81,15 @@ boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_kennedy_gruber
-basis = LobattoLegendreBasis(3)
+volume_flux  = flux_lax_friedrichs
 
+basis = LobattoLegendreBasis(3)
 
 volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 
 solver = DGSEM(basis, surface_flux, volume_integral)
 
-
-
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=5, n_cells_max=10_000, periodicity=false)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=4, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 
 
@@ -114,7 +111,7 @@ alive_callback = AliveCallback(analysis_interval=analysis_interval)
 save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-#stepsize_callback = StepsizeCallback(cfl=0.3)
+stepsize_callback = StepsizeCallback(cfl=0.4)
 
 save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
 
@@ -126,7 +123,7 @@ callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, sav
 ###############################################################################
 # run the simulation
 sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
-
+#sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
 
 
 # Print the timer summary
@@ -134,11 +131,5 @@ summary_callback()
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
-
-#plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ = "*string(tau), linewidth = 3, guidefont=font(28))
-plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
-
-
-#plot!(pd, label = "Momente")
-plot!(pde.x, pde.data[:,1], xlims = (-1, 1), label = "Euler 1D", seriestype = :scatter, markersize=3)
-# plot(pd.x, pd.data[:,3], label = "Momentensystem 1D", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
+plot(pd)
+#plot!(pde)

@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.8
+t = 0.4
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 ###############################################################################
@@ -13,20 +13,20 @@ equations = EulerEquations1D(5/3)
 initial_condition = initial_condition_constant
 
 surface_flux = flux_lax_friedrichs
+volume_flux  = flux_lax_friedrichs
 
 boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
-volume_flux  = flux_lax_friedrichs
-basis = LobattoLegendreBasis(3)                                  
+basis = LobattoLegendreBasis(3) 
+
 volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
+
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=4, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
-
-
 
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
@@ -57,8 +57,8 @@ callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, sav
 
 # ###############################################################################
 # # run the simulation
-# sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
-sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
+sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
+#sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
 
 summary_callback() # print the timer summary
 
@@ -72,7 +72,7 @@ pde = PlotData1D(sol; solution_variables=cons2prim)
 vxr = 0.0
 theta_r = 1.0
 rho_r = 1.0 
-tau = 0.001
+tau = 0.4
 equations = MomentSystem1D(vxr, theta_r, rho_r, tau)
 
 initial_condition = initial_condition_constant
@@ -83,17 +83,14 @@ boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
 surface_flux = flux_lax_friedrichs
 volume_flux  = flux_lax_friedrichs
-basis = LobattoLegendreBasis(3)
 
+basis = LobattoLegendreBasis(3)
 
 volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 
 solver = DGSEM(basis, surface_flux, volume_integral)
 
-
-
-
-mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=5, n_cells_max=10_000, periodicity=false)
+mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=4, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions, source_terms=source_terms_convergence_test)
 
 
@@ -115,7 +112,7 @@ alive_callback = AliveCallback(analysis_interval=analysis_interval)
 save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
 
 # The StepsizeCallback handles the re-calculcation of the maximum Δt after each time step
-#stepsize_callback = StepsizeCallback(cfl=0.3)
+stepsize_callback = StepsizeCallback(cfl=0.0001)
 
 save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
 
@@ -127,7 +124,7 @@ callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, sav
 ###############################################################################
 # run the simulation
 sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks);
-
+#sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
 
 
 # Print the timer summary
@@ -136,10 +133,13 @@ summary_callback()
 pd = PlotData1D(sol; solution_variables=cons2prim)
 
 
-#plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ = "*string(tau), linewidth = 3, guidefont=font(28))
-#plot(pd.x, pd.data[:,1], label = "Momentensystem", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
+#plot(pd.x, pd.data[:,1], label = false, title ="ρ, t = "*string(t)*", τ  \u2192 ∞" , linewidth = 4, guidefont=font(28))
+#plot(pd.x, pd.data[:,1], label = false, title ="ρ, t = "*string(t)*", τ = "*string(tau)*" ", linewidth = 3)
 
-
+#v\u2093
 #plot(pd)
-#plot!(pde.x, pde.data[:,1], xlims = (-1, 1), label = "Euler 1D", seriestype = :scatter, markersize=3)
-plot(pd.x, pd.data[:,3], label = "Momentensystem 1D", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
+
+#plot(pd.x, pd.data[:,1], label = "Momentensystem 1D", title ="ρ, t = "*string(t)*", τ \u2192 ∞", linewidth = 3)
+#plot!(pde.x, pde.data[:,1], xlims = (-1, 1),  label = false, seriestype = :scatter, markersize=3, titlefontsize = 21, tickfontsize=12)
+plot(pd)
+#plot!(pde)

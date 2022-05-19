@@ -1,6 +1,7 @@
 using OrdinaryDiffEq
 using Trixi
 using Plots 
+using TickTock
 
 ###############################################################################
 # semidiscretization of the compressible Euler equations
@@ -8,9 +9,11 @@ vxr = 0.2
 vyr = 0.1
 theta_r = 1.18
 rho_r = 1.24
-#für kleineres tau dauert es länger und sieht nicht besser aus!
-tau = 0.001
+tau = 0.01
 equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
+
+
+tick()
 
 """
     initial_condition_kelvin_helmholtz_instability(x, t, equations::CompressibleEulerEquations2D)
@@ -53,19 +56,20 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_fv=surface_flux)
 
 #volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
+
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=3,
+                initial_refinement_level=4,
                 n_cells_max=400_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 2.5)
+tspan = (0.0, 1.5)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -78,23 +82,22 @@ alive_callback = AliveCallback(analysis_interval=analysis_interval)
 save_solution = SaveSolutionCallback(interval=20,
                                      save_initial_solution=true,
                                      save_final_solution=true,
-                                     solution_variables=cons2prim)
+                                     solution_variables=cons2prim)                                   
 
 stepsize_callback = StepsizeCallback(cfl=0.1)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
-                        save_solution,
-                        stepsize_callback)
+                        save_solution, stepsize_callback)
 
 
 ###############################################################################
 # run the simulation
 
-# sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
-#             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
-#             save_everystep=false, callback=callbacks);
-sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks,maxiters=1e6);
+sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
+            dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
+            save_everystep=false, callback=callbacks);
+#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks, maxiters = 1e25);
 
 
 summary_callback() # print the timer summary
@@ -102,11 +105,15 @@ summary_callback() # print the timer summary
 # pdt = PlotData1D(sol; solution_variables=cons2prim)
 # plot(pdt)
 
-pdt1 = PlotData1D(sol; solution_variables=cons2prim)
-pdt2 = PlotData2D(sol; solution_variables=cons2prim)
-plot(pdt2, size = (1900,1200), xaxis=false, titlefontsize = 21, tickfontsize=12)
 
-# plot(pdt2["ρ"], title = "ρ")
+tock()
+
+
+# pdt1 = PlotData1D(sol; solution_variables=cons2prim)
+ pdt2 = PlotData2D(sol; solution_variables=cons2prim)
+ plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
+
+# #plot(pdt2["ρ"], title = "ρm", size = (1000,800))
 # plot(pdt2["v1"], title = L"v_x")
 # plot(pdt2["v2"], title = L"v_y")
 # plot(pdt2["p"], title = L"p")

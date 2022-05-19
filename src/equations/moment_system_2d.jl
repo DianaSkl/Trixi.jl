@@ -60,14 +60,11 @@ end
   vy_rr = a_rr[5]
   p_rr = a_rr[4]
   
-  theta_ll = p_ll/rho_ll
-  theta_rr = p_rr/rho_rr
 
   # Average each factor of products in flux
   rho_avg = 1/2 * (rho_ll + rho_rr)
   vx_avg  = 1/2 * (vx_ll +  vx_rr)
   vy_avg  = 1/2 * (vy_ll +  vy_rr)
-  theta_avg = 1/2 * (theta_ll + theta_rr)
   p_avg = 1/2 * (p_ll + p_rr)
 
   W = SVector(prim2cons((rho_avg, vx_avg, vy_avg, p_avg ),equations))      
@@ -239,13 +236,13 @@ end
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
   
 
-     a1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-     a2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-     a3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-     a4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-     a5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
-
-    return (0,0,0,0,a1/tau,a2/tau,a3/tau,a4/tau,a5/tau)
+     p1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
+     p2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+     p3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
+     p4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
+     p5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
+ 
+    return (0,0,0,0,p1/tau,p2/tau,p3/tau,p4/tau,p5/tau)
   end 
 
 

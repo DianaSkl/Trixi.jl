@@ -40,9 +40,9 @@ for i = 1:length(y)
 end
     
 
-p1 = plot(y, rho, title="ρ", legend = false, xlabel = "y", titlefontsize = 20, xlabelfontsize=15)
-p2 = plot(y, vx, title = L"v_x", legend = false, xlabel = "y", titlefontsize = 20, xlabelfontsize=15)
-p3 = plot(x, vy, title = L"v_y", legend = false, xlabel = "x", titlefontsize = 20, xlabelfontsize=15)
+p1 = plot(y, rho, title="ρ", legend = false, xlabel = "y", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
+p2 = plot(y, vx, title = L"v_x", legend = false, xlabel = "y", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
+p3 = plot(x, vy, title = L"v_y", legend = false, xlabel = "x", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
 p4 = plot(y, theta, title ="theta")
 
 plot(p1,p2,p3,p4)
