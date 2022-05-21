@@ -9,7 +9,7 @@ vyr = 0.5
 theta_r = 1/3
 rho_r = 2.0
 tau = 0.1
-equations = PerturbationMomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
+equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 initial_condition = initial_condition_convergence_test
 

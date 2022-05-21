@@ -218,7 +218,7 @@ end
   @unpack vxr, vyr, theta_r, rho_r, tau = equations
   
    #convtest zeit&raum
-   #f1,f2,f3,f4,f5,f6,f7,f8,f9 = source_spatialtime(u, equations::MomentSystem2D)
+   #f1,f2,f3,f4,f5,f6,f7,f8,f9 = source_convergence_spatialtime(u, x, t, equations::MomentSystem2D)
     
    #produktionen
    f1,f2,f3,f4,f5,f6,f7,f8,f9 = source_productions(u, equations::MomentSystem2D)
@@ -241,13 +241,13 @@ end
      p3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
      p4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
      p5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
- 
+
     return (0,0,0,0,p1/tau,p2/tau,p3/tau,p4/tau,p5/tau)
   end 
 
 
 
-  @inline function source_spatialtime(u, equations::MomentSystem2D)
+  @inline function source_convergence_spatialtime(u,x,t,equations::MomentSystem2D)
     @unpack vxr, vyr, theta_r, rho_r, tau = equations
     c = 2
     A = 0.1
@@ -255,7 +255,6 @@ end
     f = 1/L
     m = 1/L
     ω = 2 * pi * f
-    z = t
     x1 = x[1]
     x2 = x[2]
   
@@ -265,17 +264,6 @@ end
     p1 = 2/3
     p2 = 1/3
   
-    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-  
-    a1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-    a2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-    a3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-    a4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-    a5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
-  
-    a2 = a1 = a3 = a4 = a5 = 0
-
-    # const
 
     dw0_x = (A*ω*cos((x2+x1-t)*ω))/c
 
@@ -300,11 +288,11 @@ end
    f2 = -dw0x_x + vxr * dw0x_x + sqrt(theta_r) * (dw0_x - dw1_x) + 2.0 * sqrt(theta_r) * dw0xx_x + vyr * dw0x_x + 2.0 * sqrt(theta_r) * dw0xy_x
    f3 = -dw0y_x + vxr * dw0y_x + 2.0 * sqrt(theta_r) * dw0xy_x + vyr * dw0y_x + sqrt(theta_r) * (dw0_x - dw1_x + 2.0 * dw0yy_x)
    f4 = -dw1_x + vxr * dw1_x + sqrt(theta_r) * (5.0 * dw1x_x - 2.0 * dw0x_x)/3.0 +vyr * dw1_x + sqrt(theta_r) * (5.0 * dw1y_x - 2.0 * dw0y_x)/3.0
-   f5 = -dw0xx_x + vxr * dw0xx_x + 2.0 * sqrt(theta_r)* (dw0x_x - dw1x_x)/3.0  + vyr * dw0xx_x + sqrt(theta_r) * (dw1y_x - dw0y_x)/3.0 + a1/tau
-   f6 = -dw0yy_x + vxr * dw0yy_x + sqrt(theta_r) * (dw1x_x - dw0x_x)/3.0 + vyr * dw0yy_x + sqrt(theta_r) * 2.0 * (dw0y_x - dw1y_x)/3.0 + a2/tau
-   f7 = -dw0xy_x + vxr * dw0xy_x + sqrt(theta_r) * (dw0y_x - dw1y_x)/2.0 + vyr * dw0xy_x + sqrt(theta_r)  * (dw0x_x - dw1x_x)/2.0 + a3/tau
-   f8 = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + vyr * dw1x_x - sqrt(theta_r) * 4.0 * dw0xy_x / 5.0 + a4/tau
-   f9 = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + vyr * dw1y_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0yy_x / 5.0) + a5/tau
+   f5 = -dw0xx_x + vxr * dw0xx_x + 2.0 * sqrt(theta_r)* (dw0x_x - dw1x_x)/3.0  + vyr * dw0xx_x + sqrt(theta_r) * (dw1y_x - dw0y_x)/3.0 
+   f6 = -dw0yy_x + vxr * dw0yy_x + sqrt(theta_r) * (dw1x_x - dw0x_x)/3.0 + vyr * dw0yy_x + sqrt(theta_r) * 2.0 * (dw0y_x - dw1y_x)/3.0 
+   f7 = -dw0xy_x + vxr * dw0xy_x + sqrt(theta_r) * (dw0y_x - dw1y_x)/2.0 + vyr * dw0xy_x + sqrt(theta_r)  * (dw0x_x - dw1x_x)/2.0 
+   f8 = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + vyr * dw1x_x - sqrt(theta_r) * 4.0 * dw0xy_x / 5.0 
+   f9 = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + vyr * dw1y_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0yy_x / 5.0) 
 
     return (f1,f2,f3,f4,f5,f6,f7,f8,f9)
  end  

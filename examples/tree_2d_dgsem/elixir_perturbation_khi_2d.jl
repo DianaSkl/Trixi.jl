@@ -9,7 +9,7 @@ vxr = 0.2
 vyr = 0.1
 theta_r = 1.18
 rho_r = 1.24
-tau = 0.01
+tau = 0.001
 equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 
@@ -62,7 +62,7 @@ solver = DGSEM(basis, surface_flux, volume_integral)
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=4,
+                initial_refinement_level=6,
                 n_cells_max=400_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
@@ -84,7 +84,7 @@ save_solution = SaveSolutionCallback(interval=20,
                                      save_final_solution=true,
                                      solution_variables=cons2prim)                                   
 
-stepsize_callback = StepsizeCallback(cfl=0.1)
+stepsize_callback = StepsizeCallback(cfl=0.001)
 
 callbacks = CallbackSet(summary_callback,
                         analysis_callback, alive_callback,
@@ -94,10 +94,10 @@ callbacks = CallbackSet(summary_callback,
 ###############################################################################
 # run the simulation
 
-sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
-            dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
-            save_everystep=false, callback=callbacks);
-#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks, maxiters = 1e25);
+# sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
+#             dt=1.0, # solve needs some value here but it will be overwritten by the stepsize_callback
+#             save_everystep=false, callback=callbacks);
+sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks, maxiters = 1e25);
 
 
 summary_callback() # print the timer summary

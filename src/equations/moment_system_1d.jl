@@ -6,7 +6,7 @@ struct MomentSystem1D{RealT<:Real} <: AbstractMomentSystem{1, 5}
   end
 
   
-varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p")
+varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p", "σ\u2093\u2093", "q\u2093")
 varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u207D\u2070\u207E\u2093", "w\u207D\u00B9\u207E", "w\u207D\u2070\u207E\u2093\u2093", "w\u207D\u00B9\u207E\u2093" )
 
   
@@ -63,13 +63,19 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     w0, w0x, w1, w0xx, w1x = prim
     @unpack vxr, theta_r, rho_r = equations
    
+    s3theta = sqrt(theta_r^3)
+
+
     rho = w0 * rho_r
     vx = vxr + w0x * sqrt(theta_r) / w0
+    dvx = vx - vxr
     theta = theta_r - (w0x^2 * theta_r)/(3 * w0^2) -  (w1 * theta_r)/ w0
+    dtheta = theta - theta_r
     p = rho*theta
-    sigmax = - (2 * w0x^2 * theta_r * rho_r)/(3 * w0) + 2*w0xx * theta_r * rho_r
-    qx = (w0x^3 * sqrt(theta_r)^3 * rho_r)/ w0^2 - (2*w0x*w0xx*sqrt(theta_r)^3*rho_r)/w0  + (5 * w0x *w1 *sqrt(theta_r)^3*rho_r)/(2*w0) - (5*w1x*sqrt(theta_r)^3*rho_r)/2
-    return SVector(rho, vx, p)
+    sigmax = 2*rho_r*theta_r*w0xx - rho*(2*dvx^2)/3
+    qx =  -w1x*rho_r*s3theta*5/2 - sigmax*dvx  - dtheta*dvx*rho*5/2 - 0.5*rho*(dvx^3)
+ 
+    return SVector(rho, vx, p, sigmax, qx)
   end
   
     
@@ -131,7 +137,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
   @inline function source_terms_convergence_test(u, x, t, equations::MomentSystem1D)
         
    #zeit und ort
-   #f1,f2,f3,f4,f5 = source_spatialtime(u, x, t, equations::MomentSystem1D)
+   #f1,f2,f3,f4,f5 = source_convergence_spatialtime(u, x, t, equations::MomentSystem1D)
 
    #nur Zeit
    #f1,f2,f3,f4,f5 = source_time(u, x, t, equations::MomentSystem1D)
@@ -157,7 +163,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
 
 
 
-  @inline function source_spatialtime(u, x, t, equations::MomentSystem1D)
+  @inline function source_convergence_spatialtime(u, x, t, equations::MomentSystem1D)
     
     @unpack vxr, theta_r, rho_r, tau = equations 
 
@@ -166,7 +172,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     L = 2
     f = 1/L
     ω = 2 * pi * f
-      
+       
     p1 = 2/3
     p2 = 1/3
 
