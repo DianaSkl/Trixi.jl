@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.4
+t = 0.05
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 ###############################################################################
