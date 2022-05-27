@@ -9,7 +9,7 @@ vxr = 0.2
 vyr = 0.1
 theta_r = 1.18
 rho_r = 1.24
-tau = 0.001
+tau = 0.0001
 equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 
@@ -69,7 +69,7 @@ semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 1.5)
+tspan = (0.0, 2.5)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -113,7 +113,8 @@ tock()
  pdt2 = PlotData2D(sol; solution_variables=cons2prim)
  plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
 
-# #plot(pdt2["ρ"], title = "ρm", size = (1000,800))
-# plot(pdt2["v1"], title = L"v_x")
-# plot(pdt2["v2"], title = L"v_y")
-# plot(pdt2["p"], title = L"p")
+
+plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+plot(pdt2["vx"], title = L"v_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+#plot(pdt2["vy"], title = L"v_y", size = (1200,1000),  titlefontsize = 28, tickfontsize=23,guidefont=font(24))
+plot(pdt2["p"], title = L"p", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))

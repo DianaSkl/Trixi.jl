@@ -142,4 +142,4 @@ pd = PlotData1D(sol; solution_variables=cons2prim)
 
 #plot(pd["σ\u2093\u2093"], size = (800,500), label =  "t = "*string(t)*"", titlefontsize = 21, tickfontsize=12)
 #plot!(pd.x, pd.data[:,4], title = "σ\u2093\u2093", label = "t = "*string(t)*"", linewidth = 3, size = (800,500), legendfontsize=15, legend=:bottomright, titlefontsize = 25, tickfontsize=18)
-plot(pd,  size = (900,600))
+plot!(pd,  size = (900,600))

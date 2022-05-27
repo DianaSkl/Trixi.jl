@@ -16,9 +16,9 @@ global bla = 0.0
 
 for i = 1:length(y)
     B[i] = tanh(slope * y[i] + 7.5) - tanh(slope * y[i] - 7.5)
-    rho[i] = 0.5 + 0.75 * B[i]
+    rho[i] = -(0.5 + 0.75 * B[i])
     
-    vx[i] = 0.5 * (B[i] - 1)
+    vx[i] = - 0.5 * (B[i] - 1)
     vy[i] = 0.1 * sin(2 * pi * x[i])
    
     theta[i] =  1/rho[i]

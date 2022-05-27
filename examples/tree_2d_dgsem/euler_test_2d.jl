@@ -37,27 +37,28 @@ surface_flux = flux_lax_friedrichs
 volume_flux  = flux_kennedy_gruber
 polydeg = 3
 basis = LobattoLegendreBasis(polydeg)
-indicator_sc = IndicatorHennemannGassner(equations, basis,
-                                         alpha_max=0.002,
-                                         alpha_min=0.0001,
-                                         alpha_smooth=true,
-                                         variable=density_pressure)
-volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
-                                                 volume_flux_dg=volume_flux,
-                                                 volume_flux_fv=surface_flux)
+# indicator_sc = IndicatorHennemannGassner(equations, basis,
+#                                          alpha_max=0.002,
+#                                          alpha_min=0.0001,
+#                                          alpha_smooth=true,
+#                                          variable=density_pressure)
+# volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
+#                                                  volume_flux_dg=volume_flux,
+#                                                  volume_flux_fv=surface_flux)
+volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=3,
+                initial_refinement_level=6,
                 n_cells_max=100_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 1.5)
+tspan = (0.0, 3.5)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -94,7 +95,7 @@ summary_callback() # print the timer summary
 pd2 = PlotData2D(sol; solution_variables=cons2prim)
 pe = PlotData1D(sol; solution_variables=cons2prim)
 
-plot(pd2)
+plot(pd2, size = (1000,800))
 
 plot(pd2["rho"], title = "ρe", size = (1000,800))
 
