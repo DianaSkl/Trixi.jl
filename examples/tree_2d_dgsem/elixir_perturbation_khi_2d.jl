@@ -20,6 +20,7 @@ vxr = 0.2
 vyr = 0.1
 theta_r = 1.18
 rho_r = 1.24
+
 equation = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 
@@ -118,22 +119,13 @@ tock()
  pdt2 = PlotData2D(sol; solution_variables=cons2prim)
  plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
 
-
-fig1 = plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig1, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_rho.png")
-fig2 = plot(pdt2["vx"], title = L"v_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig2, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_vx.png")
-fig3 = plot(pdt2["vy"], title = L"v_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig3, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_vy.png")
-fig4 = plot(pdt2["p"], title = L"p", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig4, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_p.png")
-fig5 = plot(pdt2["σxx"], title = L"\sigma_{xx}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig5, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_sxx.png")
-fig6 = plot(pdt2["σxy"], title = L"\sigma_{xy}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig6, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_sxy.png")
-fig7 = plot(pdt2["σyy"], title = L"\sigma_{yy}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig7, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_syy.png")
-fig8 = plot(pdt2["qx"], title = L"q_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig8, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qx.png")
-fig9 = plot(pdt2["qy"], title = L"q_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-savefig(fig9, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qy.png")
+ plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["vx"], title = L"v_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["vy"], title = L"v_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["p"], title = L"p", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["σxx"], title = L"\sigma_{xx}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["σxy"], title = L"\sigma_{xy}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["σyy"], title = L"\sigma_{yy}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["qx"], title = L"q_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ plot(pdt2["qy"], title = L"q_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ 
