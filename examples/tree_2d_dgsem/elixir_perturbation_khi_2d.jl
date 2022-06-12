@@ -4,13 +4,23 @@ using Plots
 using TickTock
 
 ###############################################################################
-# semidiscretization of the compressible Euler equations
+
+#tau
+tau = 1.0e-5
+e = 5
+#initial refinement
+r = 5
+#time
+t = 3.5
+#Shock Capturing Blending Factor
+alpha = 0.008
+###############################################################################
+
 vxr = 0.2
 vyr = 0.1
 theta_r = 1.18
 rho_r = 1.24
-tau = 0.0001
-equations = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
+equation = MomentSystem2D(vxr, vyr, theta_r, rho_r, tau)
 
 
 tick()
@@ -24,11 +34,7 @@ A version of the classical Kelvin-Helmholtz instability based on
   [arXiv: 2102.06017](https://arxiv.org/abs/2102.06017)
 """
 function initial_condition_kelvin_helmholtz_instability(x, t, equations::MomentSystem2D)
-    # change discontinuity to tanh
-    # typical resolution 128^2, 256^2
-    # domain size is [-1,+1]^2
     slope = 15
-    amplitude = 0.02
     B = tanh(slope * x[2] + 7.5) - tanh(slope * x[2] - 7.5)
     rho = 0.5 + 0.75 * B
     vx = 0.5 * (B - 1)
@@ -46,8 +52,8 @@ polydeg = 3
 basis = LobattoLegendreBasis(polydeg)
 
 
-indicator_sc = IndicatorHennemannGassner(equations, basis,
-                                         alpha_max=0.002,
+indicator_sc = IndicatorHennemannGassner(equation, basis,
+                                         alpha_max=alpha,
                                          alpha_min=0.0001,
                                          alpha_smooth=true,
                                          variable=density_pressure)
@@ -56,20 +62,19 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_fv=surface_flux)
 
 #volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
-
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 coordinates_min = (-1.0, -1.0)
 coordinates_max = ( 1.0,  1.0)
 mesh = TreeMesh(coordinates_min, coordinates_max,
-                initial_refinement_level=6,
+                initial_refinement_level=r,
                 n_cells_max=400_000)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, source_terms=source_terms_convergence_test)
 
 ###############################################################################
 # ODE solvers, callbacks etc.
 
-tspan = (0.0, 2.5)
+tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
 summary_callback = SummaryCallback()
@@ -114,7 +119,21 @@ tock()
  plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
 
 
-plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-plot(pdt2["vx"], title = L"v_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-#plot(pdt2["vy"], title = L"v_y", size = (1200,1000),  titlefontsize = 28, tickfontsize=23,guidefont=font(24))
-plot(pdt2["p"], title = L"p", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+fig1 = plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig1, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_rho.png")
+fig2 = plot(pdt2["vx"], title = L"v_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig2, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_vx.png")
+fig3 = plot(pdt2["vy"], title = L"v_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig3, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_vy.png")
+fig4 = plot(pdt2["p"], title = L"p", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig4, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_p.png")
+fig5 = plot(pdt2["σxx"], title = L"\sigma_{xx}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig5, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_sxx.png")
+fig6 = plot(pdt2["σxy"], title = L"\sigma_{xy}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig6, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_sxy.png")
+fig7 = plot(pdt2["σyy"], title = L"\sigma_{yy}", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig7, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_syy.png")
+fig8 = plot(pdt2["qx"], title = L"q_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig8, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qx.png")
+fig9 = plot(pdt2["qy"], title = L"q_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+savefig(fig9, "C:/Users/diana/Desktop/Julia/03.06/Alpha_max/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qy.png")
