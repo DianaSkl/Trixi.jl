@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.05
+t = 0.1
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 ###############################################################################
@@ -85,12 +85,12 @@ volume_flux  = flux_lax_friedrichs
 
 basis = LobattoLegendreBasis(3)
 
-indicator_sc = IndicatorHennemannGassner(equations, basis,
-                                         alpha_max=0.002,
-                                         alpha_min=0.0001,
-                                         alpha_smooth=true,
-                                         variable=density_pressure)
-#volume_integral = VolumeIntegralShockCapturingHG(indicator_sc; volume_flux_dg=volume_flux, volume_flux_fv=surface_flux)
+# indicator_sc = IndicatorHennemannGassner(equations, basis,
+#                                          alpha_max=0.001,
+#                                          alpha_min=0.0001,
+#                                          alpha_smooth=true,
+#                                          variable=density_pressure)
+# volume_integral = VolumeIntegralShockCapturingHG(indicator_sc; volume_flux_dg=volume_flux, volume_flux_fv=surface_flux)
 
 volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
 
@@ -142,4 +142,4 @@ pd = PlotData1D(sol; solution_variables=cons2prim)
 
 #plot(pd["σ\u2093\u2093"], size = (800,500), label =  "t = "*string(t)*"", titlefontsize = 21, tickfontsize=12)
 #plot!(pd.x, pd.data[:,4], title = "σ\u2093\u2093", label = "t = "*string(t)*"", linewidth = 3, size = (800,500), legendfontsize=15, legend=:bottomright, titlefontsize = 25, tickfontsize=18)
-plot!(pd,  size = (900,600))
+plot(pd,  size = (900,600))
