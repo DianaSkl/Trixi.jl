@@ -39,20 +39,11 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     # Average each factor of products in flux
     rho_avg = 1/2 * (rho_ll + rho_rr)
     vx_avg  = 1/2 * (vx_ll +  vx_rr)
-    theta_avg = 1/2 * (theta_ll + theta_rr)
-  
+    p_avg = 1/2 * (p_ll + p_rr)
 
-    dvx = vx_avg - vxr 
-    dtheta = theta_avg - theta_r
-    sxx = qx = 0.0
 
-    w0 = rho_avg/rho_r
-    w0x = (rho_avg * dvx)/(rho_r * sqrt(theta_r))
-    w1 = -dtheta*rho_avg/(rho_r*theta_r) - (rho_avg*(dvx^2))/(3*rho_r*theta_r)
-    w0xx = 0.5*sxx/(rho_r*theta_r) + 0.5*(rho_avg*2*(dvx^2)/3)/(rho_r*theta_r)
-    w1x =  -2*(qx + sxx*dvx)/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho_avg)/(rho_r*sqrt(theta_r^3))- (rho_avg*(dvx^3))/(5*sqrt(theta_r^3)*rho_r)
- 
-    W = SVector(w0, w0x, w1, w0xx, w1x)      
+    W = SVector(prim2cons((rho_avg, vx_avg, p_avg ),equations)) 
+
     f1, f2, f3, f4, f5 = flux(W, orientation, equations)
          
     return SVector(f1, f2, f3, f4, f5)
@@ -76,6 +67,26 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     qx =  -w1x*rho_r*s3theta*5/2 - sigmax*dvx  - dtheta*dvx*rho*5/2 - 0.5*rho*(dvx^3)
  
     return SVector(rho, vx, p, sigmax, qx)
+  end
+  
+  @inline function prim2cons(prim, equations::MomentSystem1D)
+    rho, vx, p = prim
+    @unpack vxr, theta_r, rho_r = equations
+  
+    sxx = qx = 0.0
+  
+    dvx = vx - vxr 
+    theta = p/rho
+    dtheta = theta - theta_r 
+  
+
+    w0 = rho/rho_r
+    w0x = (rho* dvx)/(rho_r * sqrt(theta_r))
+    w1 = -dtheta*rho/(rho_r*theta_r) - (rho*(dvx^2))/(3*rho_r*theta_r)
+    w0xx = 0.5*sxx/(rho_r*theta_r) + 0.5*(rho*2*(dvx^2)/3)/(rho_r*theta_r)
+    w1x =  -2*(qx + sxx*dvx)/(5*rho_r*sqrt(theta_r^3)) - (dtheta*dvx*rho)/(rho_r*sqrt(theta_r^3))- (rho*(dvx^3))/(5*sqrt(theta_r^3)*rho_r)
+ 
+    return SVector(w0, w0x, w1, w0xx, w1x)
   end
   
     

@@ -9,7 +9,7 @@ using TickTock
 tau = 1.0e-2
 e = 2
 #initial refinement
-r = 5
+r = 2
 #time
 t = 1.5
 #Shock Capturing Blending Factor
@@ -62,7 +62,7 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
                                                  volume_flux_dg=volume_flux,
                                                  volume_flux_fv=surface_flux)
 
-#volume_integral = VolumeIntegralFluxDifferencing(volume_flux)
+
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 coordinates_min = (-1.0, -1.0)
@@ -139,3 +139,4 @@ tock()
 #  fig9 = plot(pdt2["qy"], title = L"q_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
 #  savefig(fig9, "C:/Users/diana/OneDrive/Desktop/julianeu/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qy.png")
 
+plot(pdt2["σyy"], title = L"\sigma_{yy}", size = (800,800),  titlefontsize = 80)

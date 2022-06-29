@@ -635,8 +635,7 @@
   
   @inline function density_pressure(u, equations::EulerEquations1D)
    rho, rho_v1, rho_e = u
-   #rho_times_p = (equations.gamma - 1) * (rho * rho_e - 0.5 * (rho_v1^2))
-   rho_times_p = 1.0
+   rho_times_p = (equations.gamma - 1) * (rho * rho_e - 0.5 * (rho_v1^2))
    return rho_times_p
   end
   

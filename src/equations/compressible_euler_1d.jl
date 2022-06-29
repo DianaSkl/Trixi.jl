@@ -51,10 +51,25 @@ varnames(::typeof(cons2prim), ::CompressibleEulerEquations1D) = ("rho", "v1", "p
 
 A constant initial condition to test free-stream preservation.
 """
+# function initial_condition_constant(x, t, equations::CompressibleEulerEquations1D)
+#   rho = 1.0
+#   rho_v1 = 0.1
+#   rho_e = 10.0
+#   return SVector(rho, rho_v1, rho_e)
+# end
+
+
+  
 function initial_condition_constant(x, t, equations::CompressibleEulerEquations1D)
-  rho = 1.0
-  rho_v1 = 0.1
-  rho_e = 10.0
+  if (x[1] < 0)
+    rho = 3.0 
+    theta = 1.0
+  else
+    rho = 1.0
+    theta = 1.0
+  end
+  rho_v1 = 0.0
+  rho_e = 3.0 * rho*theta / 2.0
   return SVector(rho, rho_v1, rho_e)
 end
 
