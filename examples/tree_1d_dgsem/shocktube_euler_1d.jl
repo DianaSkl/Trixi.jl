@@ -4,6 +4,10 @@ using Plots
 
 
 
+t = 0.4
+coordinates_min = (-1.0,)
+coordinates_max = ( 1.0,)
+
 ##############################################################################
 # semidiscretization of the compressible Euler equations
 
@@ -14,27 +18,26 @@ initial_condition = initial_condition_constant
 boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
 
+
 surface_flux = flux_lax_friedrichs
 volume_flux  = flux_kennedy_gruber
 
-basis = LobattoLegendreBasis(3)  
+basis = LobattoLegendreBasis(3)
 
-
+shock_indicator_variable = density_pressure
 
 indicator_sc = IndicatorHennemannGassner(equations, basis,
-                                         alpha_max=1.0,
-                                         alpha_min=0.0001,
+                                         alpha_max=0.5,
+                                         alpha_min=0.001,
                                          alpha_smooth=true,
-                                         variable=Trixi.density)
-volume_integral = VolumeIntegralShockCapturingHG(indicator_sc; volume_flux_dg=volume_flux, volume_flux_fv=surface_flux)
-
+                                         variable=shock_indicator_variable)
+volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
+                                                 volume_flux_dg=volume_flux,
+                                                 volume_flux_fv=surface_flux)
 
 solver = DGSEM(basis, surface_flux, volume_integral)
 
 
-t = 0.4
-coordinates_min = (-1.0,)
-coordinates_max = ( 1.0,)
 
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions)
@@ -73,5 +76,10 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_
 summary_callback() # print the timer summary
 
 pds = PlotData1D(sol; solution_variables=cons2prim)
+f1 = plot(pds.x, pds.data[:,1], title = "ρ")
+f2 = plot(pds.x, pds.data[:,2], title = "v\u2093")
+f3 = plot(pds.x, pds.data[:,3], title = "p")
+plot(pds, legend = false, titlefontsize = 21, tickfontsize=12, linewidth = 2, size=(900,500))
 
-plot(pds.x, pds.data[:,1] , size = (800,500), label =  "Euler Eq. with Kennedy-Gruber Flux", titlefontsize = 21, tickfontsize=12, linewidth = 4)
+#plot(pds.x, pds.data[:,1] , size = (900,500), titlefontsize = 21, tickfontsize=12, linewidth = 4)
+

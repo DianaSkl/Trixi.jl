@@ -8,6 +8,7 @@ struct MomentSystem1D{RealT<:Real} <: AbstractMomentSystem{1, 5}
 
   
 varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p", "σ\u2093\u2093", "q\u2093")
+#varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p")
 varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u207D\u2070\u207E\u2093", "w\u207D\u00B9\u207E", "w\u207D\u2070\u207E\u2093\u2093", "w\u207D\u00B9\u207E\u2093" )
 
   

@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.4
+t = 0.3
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 
@@ -28,15 +28,17 @@ volume_flux  = flux_ds
 
 basis = LobattoLegendreBasis(3)
 
+shock_indicator_variable = density_pressure
+
 indicator_sc = IndicatorHennemannGassner(equations, basis,
-                                         alpha_max=1.0,
+                                         alpha_max=0.5,
                                          alpha_min=0.0001,
                                          alpha_smooth=true,
-                                         variable=Trixi.density)
+                                         variable=shock_indicator_variable)
 volume_integral = VolumeIntegralShockCapturingHG(indicator_sc; volume_flux_dg=volume_flux, volume_flux_fv=surface_flux)
 
 
-solver = DGSEM(basis, surface_flux, volume_integral)
+solver = DGSEM(basis, surface_flux)
 
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions,source_terms=source_terms_convergence_test)
@@ -73,7 +75,7 @@ callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, sav
 ###############################################################################
 # run the simulation
 sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
-
+#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks)
 
 # Print the timer summary
 summary_callback()
@@ -82,4 +84,10 @@ summary_callback()
 # plot the simulation
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
-plot!(pd.x, pd.data[:,1] , size = (800,500), label =  "Moment System with DS Flux", titlefontsize = 21, tickfontsize=12, linewidth = 4)
+# f1 = plot(pd.x, pd.data[:,1], title = "ρ")
+# f2 = plot(pd.x, pd.data[:,2], title = "v\u2093")
+# f3 = plot(pd.x, pd.data[:,3], title = "p")
+#plot(pd, legend = false, titlefontsize = 21, tickfontsize=12, linewidth = 2, size=(900,500))
+
+
+plot(pd.x, pd.data[:,4] , title= "σ\u2093\u2093", label="t = 0.3", legend=:bottomright, legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
