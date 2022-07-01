@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.6
+t = 0.4
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 
@@ -74,8 +74,8 @@ callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, sav
 
 ###############################################################################
 # run the simulation
-#sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
-sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks)
+sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
+#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks)
 
 # Print the timer summary
 summary_callback()
@@ -84,12 +84,5 @@ summary_callback()
 # plot the simulation
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
-#  f1 = plot(pd.x, pd.data[:,1], title = "ρ")
-# f2 = plot(pd.x, pd.data[:,2], title = "v\u2093")
-#  f3 = plot(pd.x, pd.data[:,3], title = "p")
-#plot!(f1, f2, f3, legend = false, layout=(1,3),titlefontsize = 21, tickfontsize=12, linewidth = 2, size=(900,500))
-#plot!(pd,  size=(1000,1000),  linewidth = 3)
 
-plot!(pd.x, pd.data[:,4] , title= L"\sigma_{xx}", label="t = 0.6", legend=:topleft, guidefontsize = 20, legendfontsize= 20, titlefontsize = 30, tickfontsize=18, linewidth = 3, size=(900,500))
-#plot!(pd.x, pd.data[:,5] , title= L"q_x", label="t = 0.6", legend=:bottomleft, guidefontsize = 20, legendfontsize= 20, titlefontsize = 30, tickfontsize=18, linewidth = 3, size=(900,500))
-#plot(pd.x, pd.data[:,1] , title= "ρ", legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
+plot(pd,linecolor ="green", guidefontsize = 10, legendfontsize= 10, titlefontsize = 20, tickfontsize=11, linewidth = 2, guidefont=font(19),size=(700,500))

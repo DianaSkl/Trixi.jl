@@ -76,6 +76,5 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_
 summary_callback() # print the timer summary
 
 pds = PlotData1D(sol; solution_variables=cons2prim)
-plot(pds)
-plot!(pds.x, pds.data[:,1] , size = (900,500), titlefontsize = 21, tickfontsize=12, linewidth = 4)
 
+plot(pds, linecolor ="red", guidefontsize = 10, legendfontsize= 10, titlefontsize = 25, tickfontsize=11, linewidth = 3, guidefont=font(19),size=(700,500))
