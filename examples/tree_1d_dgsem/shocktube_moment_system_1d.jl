@@ -90,6 +90,6 @@ pd = PlotData1D(sol; solution_variables=cons2prim)
 #plot!(f1, f2, f3, legend = false, layout=(1,3),titlefontsize = 21, tickfontsize=12, linewidth = 2, size=(900,500))
 #plot!(pd,  size=(1000,1000),  linewidth = 3)
 
-#plot(pd.x, pd.data[:,4] , title= "σ\u2093\u2093", label="t = 0.6", legend=:topleft, legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
-plot!(pd.x, pd.data[:,5] , title= L"q_x", label="t = 0.6", legend=:bottomleft, legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
+plot!(pd.x, pd.data[:,4] , title= L"\sigma_{xx}", label="t = 0.6", legend=:topleft, guidefontsize = 20, legendfontsize= 20, titlefontsize = 30, tickfontsize=18, linewidth = 3, size=(900,500))
+#plot!(pd.x, pd.data[:,5] , title= L"q_x", label="t = 0.6", legend=:bottomleft, guidefontsize = 20, legendfontsize= 20, titlefontsize = 30, tickfontsize=18, linewidth = 3, size=(900,500))
 #plot(pd.x, pd.data[:,1] , title= "ρ", legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
