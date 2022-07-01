@@ -6,14 +6,14 @@ using TickTock
 ###############################################################################
 
 #tau
-tau = 1.0e-2
-e = 2
+tau = 1.0e-4
+e = 4
 #initial refinement
-r = 2
+r = 6
 #time
-t = 1.5
+t = 2.5
 #Shock Capturing Blending Factor
-alpha = 0.008
+alpha = 0.004
 ###############################################################################
 
 vxr = 0.2
@@ -117,7 +117,7 @@ tock()
 
 # pdt1 = PlotData1D(sol; solution_variables=cons2prim)
  pdt2 = PlotData2D(sol; solution_variables=cons2prim)
- plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
+ #plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
 
 
 #  fig1 = plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
@@ -139,4 +139,4 @@ tock()
 #  fig9 = plot(pdt2["qy"], title = L"q_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
 #  savefig(fig9, "C:/Users/diana/OneDrive/Desktop/julianeu/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qy.png")
 
-plot(pdt2["σyy"], title = L"\sigma_{yy}", size = (800,800),  titlefontsize = 80)
+plot(pdt2["σxx"], title = L"\sigma_{xx}", size = (800,800),  titlefontsize = 80)
