@@ -33,16 +33,17 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     @unpack vxr, theta_r, rho_r = equations
 
     # Unpack left and right state
-    rho_ll, vx_ll, p_ll = cons2prim(u_ll, equations)
-    rho_rr, vx_rr, p_rr = cons2prim(u_rr, equations)
+    rho_ll, vx_ll, p_ll, sx_ll, qx_ll = cons2prim(u_ll, equations)
+    rho_rr, vx_rr, p_rr, sx_rr, qx_rr = cons2prim(u_rr, equations)
   
     # Average each factor of products in flux
     rho_avg = 1/2 * (rho_ll + rho_rr)
     vx_avg  = 1/2 * (vx_ll +  vx_rr)
     p_avg = 1/2 * (p_ll + p_rr)
+    sx_avg = 1/2 * (sx_ll + sx_rr)
+    qx_avg = 1/2 * (qx_ll + qx_rr)
 
-
-    W = SVector(prim2cons((rho_avg, vx_avg, p_avg ),equations)) 
+    W = SVector(prim2cons((rho_avg, vx_avg, p_avg, sx_avg, qx_avg),equations)) 
 
     f1, f2, f3, f4, f5 = flux(W, orientation, equations)
          
@@ -70,10 +71,10 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
   end
   
   @inline function prim2cons(prim, equations::MomentSystem1D)
-    rho, vx, p = prim
+    rho, vx, p, sxx, qx = prim
     @unpack vxr, theta_r, rho_r = equations
   
-    sxx = qx = 0.0
+    #sxx = qx = 0.0
   
     dvx = vx - vxr 
     theta = p/rho

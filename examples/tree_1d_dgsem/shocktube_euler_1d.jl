@@ -76,10 +76,6 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_
 summary_callback() # print the timer summary
 
 pds = PlotData1D(sol; solution_variables=cons2prim)
-f1 = plot(pds.x, pds.data[:,1], title = "ρ")
-f2 = plot(pds.x, pds.data[:,2], title = "v\u2093")
-f3 = plot(pds.x, pds.data[:,3], title = "p")
-plot(pds, legend = false, titlefontsize = 21, tickfontsize=12, linewidth = 2, size=(900,500))
-
-#plot(pds.x, pds.data[:,1] , size = (900,500), titlefontsize = 21, tickfontsize=12, linewidth = 4)
+plot(pds)
+plot!(pds.x, pds.data[:,1] , size = (900,500), titlefontsize = 21, tickfontsize=12, linewidth = 4)
 

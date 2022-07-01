@@ -2,7 +2,7 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.3
+t = 0.6
 coordinates_min = (-1.0,)
 coordinates_max = ( 1.0,)
 
@@ -38,7 +38,7 @@ indicator_sc = IndicatorHennemannGassner(equations, basis,
 volume_integral = VolumeIntegralShockCapturingHG(indicator_sc; volume_flux_dg=volume_flux, volume_flux_fv=surface_flux)
 
 
-solver = DGSEM(basis, surface_flux)
+solver = DGSEM(basis, surface_flux, volume_integral)
 
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions,source_terms=source_terms_convergence_test)
@@ -74,8 +74,8 @@ callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, sav
 
 ###############################################################################
 # run the simulation
-sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
-#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks)
+#sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
+sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks)
 
 # Print the timer summary
 summary_callback()
@@ -84,10 +84,12 @@ summary_callback()
 # plot the simulation
 
 pd = PlotData1D(sol; solution_variables=cons2prim)
-# f1 = plot(pd.x, pd.data[:,1], title = "ρ")
+#  f1 = plot(pd.x, pd.data[:,1], title = "ρ")
 # f2 = plot(pd.x, pd.data[:,2], title = "v\u2093")
-# f3 = plot(pd.x, pd.data[:,3], title = "p")
-#plot(pd, legend = false, titlefontsize = 21, tickfontsize=12, linewidth = 2, size=(900,500))
+#  f3 = plot(pd.x, pd.data[:,3], title = "p")
+#plot!(f1, f2, f3, legend = false, layout=(1,3),titlefontsize = 21, tickfontsize=12, linewidth = 2, size=(900,500))
+#plot!(pd,  size=(1000,1000),  linewidth = 3)
 
-
-plot(pd.x, pd.data[:,4] , title= "σ\u2093\u2093", label="t = 0.3", legend=:bottomright, legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
+#plot(pd.x, pd.data[:,4] , title= "σ\u2093\u2093", label="t = 0.6", legend=:topleft, legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
+plot!(pd.x, pd.data[:,5] , title= L"q_x", label="t = 0.6", legend=:bottomleft, legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
+#plot(pd.x, pd.data[:,1] , title= "ρ", legendfontsize= 18, titlefontsize = 25, tickfontsize=12, linewidth = 3, size=(900,500))
