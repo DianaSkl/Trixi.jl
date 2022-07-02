@@ -7,8 +7,8 @@ struct MomentSystem1D{RealT<:Real} <: AbstractMomentSystem{1, 5}
   end
 
   
-#varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p", "σ\u2093\u2093", "q\u2093")
-varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p")
+varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p", "σ\u2093\u2093", "q\u2093")
+#varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p")
 varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u207D\u2070\u207E\u2093", "w\u207D\u00B9\u207E", "w\u207D\u2070\u207E\u2093\u2093", "w\u207D\u00B9\u207E\u2093" )
 
   
@@ -70,8 +70,8 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     sigmax = 2*rho_r*theta_r*w0xx - rho*(2*dvx^2)/3
     qx =  -w1x*rho_r*s3theta*5/2 - sigmax*dvx  - dtheta*dvx*rho*5/2 - 0.5*rho*(dvx^3)
  
-    #return SVector(rho, vx, p, sigmax, qx)
-    return SVector(rho, vx, p)
+    return SVector(rho, vx, p, sigmax, qx)
+    #return SVector(rho, vx, p)
   end
   
   @inline function prim2cons(prim, equations::MomentSystem1D)
