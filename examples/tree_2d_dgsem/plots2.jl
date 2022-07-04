@@ -54,4 +54,4 @@ for i = 1:length(x)
 end
 
 #plot!(x, rho)
-plot!(x, vx)
+plot(x, vx)

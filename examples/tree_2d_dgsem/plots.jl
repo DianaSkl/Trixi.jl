@@ -16,9 +16,9 @@ global bla = 0.0
 
 for i = 1:length(y)
     B[i] = tanh(slope * y[i] + 7.5) - tanh(slope * y[i] - 7.5)
-    rho[i] = -(0.5 + 0.75 * B[i])
+    rho[i] = (0.5 + 0.75 * B[i])
     
-    vx[i] = - 0.5 * (B[i] - 1)
+    vx[i] = 0.5 * (B[i] - 1)
     vy[i] = 0.1 * sin(2 * pi * x[i])
    
     theta[i] =  1/rho[i]
@@ -41,9 +41,8 @@ end
     
 
 p1 = plot(y, rho, title="ρ", legend = false, xlabel = "y", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
-p2 = plot(y, vx, title = L"v_x", legend = false, xlabel = "y", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
-p3 = plot(x, vy, title = L"v_y", legend = false, xlabel = "x", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
-p4 = plot(y, theta, title ="theta")
+p2 = plot(y, vx, title = "v\u2093", legend = false, xlabel = "y", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
+p3 = plot(x, vy, title = "vy", legend = false, xlabel = "x", titlefontsize = 20, xlabelfontsize=12, tickfontsize=12)
 
-plot(p1,p2,p3,p4)
+plot(p1,p2,p3, layout = (1,3), guidefontsize = 6, legendfontsize= 5, titlefontsize = 15, tickfontsize=9, linewidth = 2, guidefont=font(15), size=(400,250))
 
