@@ -9,9 +9,9 @@ using TickTock
 tau = 1.0e-4
 e = 4
 #initial refinement
-r = 3
+r = 6
 #time
-t = 0
+t = 3.5
 #Shock Capturing Blending Factor
 alpha = 0.004
 ###############################################################################
@@ -139,4 +139,4 @@ tock()
 #  fig9 = plot(pdt2["qy"], title = L"q_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
 #  savefig(fig9, "C:/Users/diana/OneDrive/Desktop/julianeu/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qy.png")
 
-plot(pdt2["ρ"], title = "ρ",size = (1000,800),  titlefontsize = 60, tickfontsize=25,guidefont=font(24))
+plot(pdt2["qx"], title = "qx",size = (1000,800),  titlefontsize = 60, tickfontsize=20,guidefont=font(20))
