@@ -44,7 +44,7 @@ varnames(::typeof(cons2cons), ::MomentSystem2D) = ("w0", "w0x", "w0y", "w1", "w0
 end
   
 
-@inline function flux_kennedy_gruber(u_ll, u_rr, orientation::Integer, equations::MomentSystem2D)
+@inline function flux_ds(u_ll, u_rr, orientation::Integer, equations::MomentSystem2D)
 
   @unpack vxr, vyr, theta_r, rho_r = equations
 

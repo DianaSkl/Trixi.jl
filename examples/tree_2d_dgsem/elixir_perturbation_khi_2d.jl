@@ -6,14 +6,14 @@ using TickTock
 ###############################################################################
 
 #tau
-tau = 1.0e-4
-e = 4
+tau = 1.0e-2
+e = 2
 #initial refinement
-r = 3
+r = 5
 #time
-t = 0
+t = 3.5
 #Shock Capturing Blending Factor
-alpha = 0.004
+alpha = 0.009
 ###############################################################################
 
 vxr = 0.2
@@ -48,7 +48,7 @@ end
 initial_condition = initial_condition_kelvin_helmholtz_instability
 
 surface_flux = flux_lax_friedrichs
-volume_flux  = flux_kennedy_gruber
+volume_flux  = flux_ds
 polydeg = 3
 basis = LobattoLegendreBasis(polydeg)
 
@@ -120,8 +120,8 @@ tock()
  #plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
 
 
-#  fig1 = plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
-#  savefig(fig1, "C:/Users/diana/OneDrive/Desktop/julianeu/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_rho.png")
+ fig1 = plot(pdt2["ρ"], title = "ρ", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
+ savefig(fig1, "C:/Users/diana/Desktop/Julia_neu/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_rho.png")
 #  fig2 = plot(pdt2["vx"], title = L"v_x", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
 #  savefig(fig2, "C:/Users/diana/OneDrive/Desktop/julianeu/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_vx.png")
 #  fig3 = plot(pdt2["vy"], title = L"v_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
@@ -139,4 +139,5 @@ tock()
 #  fig9 = plot(pdt2["qy"], title = L"q_y", size = (1000,800),  titlefontsize = 30, tickfontsize=25,guidefont=font(24))
 #  savefig(fig9, "C:/Users/diana/OneDrive/Desktop/julianeu/alpha"*string(alpha)*"_t"*string(t*10)*"e"*string(e)*"r"*string(r)*"_qy.png")
 
-plot(pdt2["ρ"], title = "ρ",size = (1000,800),  titlefontsize = 60, tickfontsize=25,guidefont=font(24))
+#plot(pdt2["ρ"], title = "ρ",size = (1000,800),  titlefontsize = 60, tickfontsize=25,guidefont=font(24))
+
