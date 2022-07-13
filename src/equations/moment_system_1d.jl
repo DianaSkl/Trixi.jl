@@ -277,4 +277,164 @@ A constant initial condition to test the shocktube problem
     return drho
     end
 
+  # possible initialization of the temperature for the shocktube problem 
+  # (here the temperature is constant for all x)
+
+  function shocktube_temp(x, equations::MomentSystem1D)
+    @unpack theta_r = equations 
+    if (x[1] < 0)
+      dtheta = 1.0 - theta_r 
+    else
+      dtheta = 1.0 - theta_r
+    end
+  
+    return dtheta
+    end
+
+
+
+@inline function init_w0(x, t, equations::MomentSystem1D)
+  @unpack rho_r = equations 
+
+  drho = shocktube_density(x, equations)
+  w0 = 1 + drho / rho_r
+ return w0
+end
+
+
+@inline function init_w0x(x, t, equations::MomentSystem1D)
+  
+  @unpack theta_r, rho_r = equations 
+
+
+  drho = shocktube_density(x, equations)
+
+  dv_x = 0
+  
+  w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
+
+ return w0x
+end
+
+
+
+@inline function init_w1(x, t, equations::MomentSystem1D)
+  
+  @unpack theta_r, rho_r = equations 
+  drho = shocktube_density(x, equations)
+  dtheta = shocktube_temp(x, equations)
+  dv_x = 0
+  rho = drho + rho_r 
+  w1 = - (rho * (dv_x *dv_x) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
+  
+ return w1
+end
+
+
+@inline function init_w0xx(x, t, equations::MomentSystem1D)
+  
+  @unpack theta_r, rho_r = equations 
+
+  drho = shocktube_density(x, equations)
+  rho = drho + rho_r
+  dv_x = 0
+
+  sigma_xx = 0.0
+  
+  w0xx = 0.5 * sigma_xx/(rho_r * theta_r) + (rho* dv_x * dv_x)/(3 * rho_r*theta_r) 
+  
+ return w0xx
+end
+  
  
+
+@inline function init_w1x(x, t, equations::MomentSystem1D)
+  
+  @unpack theta_r, rho_r = equations 
+
+  dv_x = 0
+  sigma_xx = 0.0
+  q_x = 0.0
+
+  dtheta = shocktube_temp(x, equations)
+  drho = shocktube_density(x, equations)
+  rho = drho + rho_r
+
+  w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
+
+ return w1x
+end
+
+  
+  @inline function init_w0(x, t, equations::MomentSystem1D)
+    @unpack rho_r = equations 
+  
+    drho = shocktube_density(x, equations)
+    w0 = 1 + drho / rho_r
+   return w0
+  end
+  
+  
+  @inline function init_w0x(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r, rho_r = equations 
+  
+ 
+    drho = shocktube_density(x, equations)
+  
+    dv_x = 0
+    
+    w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
+  
+   return w0x
+  end
+  
+
+  
+  @inline function init_w1(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r, rho_r = equations 
+    drho = shocktube_density(x, equations)
+    dtheta = shocktube_temp(x, equations)
+    dv_x = 0
+    rho = drho + rho_r 
+    w1 = - (rho * (dv_x *dv_x) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
+    
+   return w1
+  end
+  
+  
+  @inline function init_w0xx(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r, rho_r = equations 
+  
+    drho = shocktube_density(x, equations)
+    rho = drho + rho_r
+    dv_x = 0
+  
+    sigma_xx = 0.0
+    
+    w0xx = 0.5 * sigma_xx/(rho_r * theta_r) + (rho* dv_x * dv_x)/(3 * rho_r*theta_r) 
+    
+   return w0xx
+  end
+    
+   
+  
+  @inline function init_w1x(x, t, equations::MomentSystem1D)
+    
+    @unpack theta_r, rho_r = equations 
+
+    dv_x = 0
+    sigma_xx = 0.0
+    q_x = 0.0
+  
+    dtheta = shocktube_temp(x, equations)
+    drho = shocktube_density(x, equations)
+    rho = drho + rho_r
+  
+    w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
+  
+   return w1x
+  end
+  
