@@ -1,12 +1,16 @@
-# By default, Julia/LLVM does not use fused multiply-add operations (FMAs).
-# Since these FMAs can increase the performance of many numerical algorithms,
-# we need to opt-in explicitly.
-# See https://ranocha.de/blog/Optimizing_EC_Trixi for further details.
+# This file was used in the following master thesis:
+# - Diana Sklema (2022)
+#   "Untersuchung eines gestoerten Momentensystems in der kompressiblen Stroeomungsmechanik"
+#   University of Cologne, advisors: Gregor Gassner, Michael Schlottke-Lakemper
+#  It was necessary to create an additional system of Euler equations with different 
+#  parameters for the initial condition to compare with the perturbated moment system.
+#  It is mostly equivalent to the file compressible_euler_1d.jl
+
 @muladd begin
 
 
     @doc raw"""
-        EulerEquations1D(gamma)
+        EulerEquations1D(gamma
     
     The compressible Euler equations
     ```math

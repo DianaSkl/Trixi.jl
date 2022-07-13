@@ -1,3 +1,7 @@
+# This file was used in the following master thesis:
+# - Diana Sklema (2022)
+#   "Untersuchung eines gestoerten Momentensystems in der kompressiblen Stroeomungsmechanik"
+#   University of Cologne, advisors: Gregor Gassner, Michael Schlottke-Lakemper
 
 struct MomentSystem1D{RealT<:Real} <: AbstractMomentSystem{1, 5} 
     vxr::RealT
@@ -8,10 +12,9 @@ struct MomentSystem1D{RealT<:Real} <: AbstractMomentSystem{1, 5}
 
   
 varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p", "σ\u2093\u2093", "q\u2093")
-#varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p")
 varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u207D\u2070\u207E\u2093", "w\u207D\u00B9\u207E", "w\u207D\u2070\u207E\u2093\u2093", "w\u207D\u00B9\u207E\u2093" )
 
-  
+# Calculate 1D flux for a single point 
 @inline function flux(u, orientation::Integer, equations::MomentSystem1D)
     w0, w0x, w1, w0xx, w1x = u
   
@@ -27,14 +30,18 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return SVector(f1, f2, f3, f4, f5)
   end
 
-  
+
+  """
+  flux_ds(u_ll, u_rr, orientation, equations::MomentSystem1D)
+
+Kinetic energy preserving two-point flux for the 1d perturbated moment system
+
+"""  
   @inline function flux_ds(u_ll, u_rr, orientation::Integer, equations::MomentSystem1D)
 
     @unpack vxr, theta_r, rho_r = equations
 
     # Unpack left and right state
-    # rho_ll, vx_ll, p_ll, sx_ll, qx_ll = cons2prim(u_ll, equations)
-    # rho_rr, vx_rr, p_rr, sx_rr, qx_rr = cons2prim(u_rr, equations)
     rho_ll, vx_ll, p_ll = cons2prim(u_ll, equations)
     rho_rr, vx_rr, p_rr = cons2prim(u_rr, equations)
 
@@ -43,17 +50,14 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     rho_avg = 1/2 * (rho_ll + rho_rr)
     vx_avg  = 1/2 * (vx_ll +  vx_rr)
     p_avg = 1/2 * (p_ll + p_rr)
-    # sx_avg = 1/2 * (sx_ll + sx_rr)
-    # qx_avg = 1/2 * (qx_ll + qx_rr)
 
-    #W = SVector(prim2cons((rho_avg, vx_avg, p_avg, sx_avg, qx_avg),equations)) 
     W = SVector(prim2cons((rho_avg, vx_avg, p_avg),equations)) 
     f1, f2, f3, f4, f5 = flux(W, orientation, equations)
          
     return SVector(f1, f2, f3, f4, f5)
   end
   
-
+  # Convert conservative variables to primitive
   @inline function cons2prim(prim, equations::MomentSystem1D)
     w0, w0x, w1, w0xx, w1x = prim
     @unpack vxr, theta_r, rho_r = equations
@@ -71,11 +75,10 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     qx =  -w1x*rho_r*s3theta*5/2 - sigmax*dvx  - dtheta*dvx*rho*5/2 - 0.5*rho*(dvx^3)
  
     return SVector(rho, vx, p, sigmax, qx)
-    #return SVector(rho, vx, p)
   end
   
+  # Convert primitive to conservative variables
   @inline function prim2cons(prim, equations::MomentSystem1D)
-    #rho, vx, p, sxx, qx = prim
     rho, vx, p = prim
     @unpack vxr, theta_r, rho_r = equations
   
@@ -84,7 +87,6 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     dvx = vx - vxr 
     theta = p/rho
     dtheta = theta - theta_r 
-  
 
     w0 = rho/rho_r
     w0x = (rho* dvx)/(rho_r * sqrt(theta_r))
@@ -95,13 +97,15 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return SVector(w0, w0x, w1, w0xx, w1x)
   end
   
-    
+  # Convert conservative variables to entropy 
   @inline function cons2entropy(u, equations::MomentSystem1D)
     w0, w0x, w1, w0xx, w1x= u
   
     return SVector(w0, w0x, w1, w0xx, w1x)
   end
   
+  # Calculate maximum wave speed for local Lax-Friedrichs-type dissipation as the
+  # maximum velocity magnitude plus the maximum speed of sound
   @inline function max_abs_speed_naive(u_ll, u_rr, orientation::Integer, equations::MomentSystem1D)
     @unpack vxr, theta_r = equations
     ab1 = abs(vxr) + 2.0 * sqrt(5 * theta_r / 3)
@@ -116,6 +120,7 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return ab1
   end
   
+  # possible indicator ρp for the SC-Methode
   @inline function density_pressure(u, equations::MomentSystem1D)
     a = cons2prim(u, equations)
     rho = a[1]
@@ -124,17 +129,25 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return rho_times_p
   end
 
+  # possible indicator ρ for the SC-Methode
   @inline function density(u, equations::MomentSystem1D)
     a = cons2prim(u, equations)
     rho = a[1]
     return rho
   end
-
+  # possible indicator p for the SC-Methode 
   @inline function pressures(u, equations::MomentSystem1D)
     a = cons2prim(u, equations)
     p = a[3]
     return p
   end
+
+      
+  """
+  initial_condition_convergence_test(x, t, equations::MomentSystem1D)
+
+  periodical initial condition for the method of manufactured solution
+"""
    
   function initial_condition_convergence_test(x, t, equations::MomentSystem1D)
     
@@ -166,18 +179,23 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return SVector(w0, w0x, w1, w0xx, w1x)
   end
   
+  """
+  source_terms_convergence_test(u, x, t, equations::MomentSystem1D)
+
+Use source_convergence_spatialtime for convergence tests in combination with
+[`initial_condition_convergence_test`](@ref).
+
+Use source_productions for all physical problems where the original source term is needed
+"""
+
   @inline function source_terms_convergence_test(u, x, t, equations::MomentSystem1D)
         
-   #zeit und ort
-   #f1,f2,f3,f4,f5 = source_convergence_spatialtime(u, x, t, equations::MomentSystem1D)
+   # variable x and t 
+   f1,f2,f3,f4,f5 = source_convergence_spatialtime(u, x, t, equations::MomentSystem1D)
 
-   #nur Zeit
-   #f1,f2,f3,f4,f5 = source_time(u, x, t, equations::MomentSystem1D)
-
-   #produktionen
-   f1,f2,f3,f4,f5 = source_productions(u, equations::MomentSystem1D)
+   # original productions
+   #f1,f2,f3,f4,f5 = source_productions(u, equations::MomentSystem1D)
    
-
     return(f1,f2,f3,f4,f5)
   end 
 
@@ -192,8 +210,6 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
   
     return (0,0,0,p1/tau,p2/tau)
   end 
-
-
 
   @inline function source_convergence_spatialtime(u, x, t, equations::MomentSystem1D)
     
@@ -232,43 +248,13 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
    return (f1,f2,f3,f4,f5)
   end
 
-  @inline function source_time(u, x, t, equations::MomentSystem1D)
 
-    @unpack vxr, theta_r, rho_r, tau = equations 
-
-    c = 2
-    A = 0.1
-    L = 2
-    f = 1/L
-    ω = 2 * pi * f
       
-    p1 = 2/3
-    p2 = 1/3
+  """
+  initial_condition_constant(x, t, equations::MomentSystem1D)
 
-    vx = 1.0
-    dv_x = vx - vxr
-
-    dw0_t = -(A*ω*cos((-t)*ω))/c
-    
-    dw0x_t = -(A*dv_x*ω*cos((-t)*ω))/(c*sqrt(theta_r))
-
-    dw1_t =-(-(A*ω*cos((-t)*ω)*(p1*(A*sin((-t)*ω)+c)-theta_r-p2))/(c*theta_r)-(A*p1*ω*cos((-t)*ω)*(A*sin((-t)*ω)+c))/(c*theta_r)-(A*dv_x^2*ω*cos((-t)*ω))/(3*c*theta_r))
-    
-    dw0xx_t = -(A*dv_x^2*p1*ω*cos((-t)*ω))/(c^2*theta_r)
-
-    dw1x_t =-(-(A*dv_x*ω*cos((-t)*ω)*(p1*(A*sin((-t)*ω)+c)-theta_r-p2))/(c*theta_r^1.5)-(A*dv_x*p1*ω*cos((-t)*ω)*(A*sin((-t)*ω)+c))/(c*theta_r^1.5)-(A*dv_x^3*ω*cos((-t)*ω))/(5*c*theta_r^1.5))
-    
-
-    f1  = dw0_t 
-    f2  = dw0x_t 
-    f3  = dw1_t 
-    f4  = dw0xx_t 
-    f5  = dw1x_t 
-
-
-    return (f1,f2,f3,f4,f5)
-  end
-
+A constant initial condition to test the shocktube problem
+"""
   function initial_condition_constant(x, t, equations::MomentSystem1D)
   
     return SVector(init_w0(x, t, equations::MomentSystem1D), 
@@ -278,6 +264,8 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
                    init_w1x(x, t, equations::MomentSystem1D))
   end
 
+
+ # initialization of the density for the shocktube problem
   function shocktube_density(x, equations::MomentSystem1D)
     @unpack rho_r = equations 
     if (x[1] < 0)
@@ -289,87 +277,4 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
     return drho
     end
 
-    function shocktube_temp(x, equations::MomentSystem1D)
-      @unpack theta_r = equations 
-      if (x[1] < 0)
-        dtheta = 1.0 - theta_r 
-      else
-        dtheta = 1.0 - theta_r
-      end
-    
-      return dtheta
-      end
-  
-  
-  @inline function init_w0(x, t, equations::MomentSystem1D)
-    @unpack rho_r = equations 
-  
-    drho = shocktube_density(x, equations)
-    w0 = 1 + drho / rho_r
-   return w0
-  end
-  
-  
-  @inline function init_w0x(x, t, equations::MomentSystem1D)
-    
-    @unpack theta_r, rho_r = equations 
-  
  
-    drho = shocktube_density(x, equations)
-  
-    dv_x = 0
-    
-    w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
-  
-   return w0x
-  end
-  
-
-  
-  @inline function init_w1(x, t, equations::MomentSystem1D)
-    
-    @unpack theta_r, rho_r = equations 
-    drho = shocktube_density(x, equations)
-    dtheta = shocktube_temp(x, equations)
-    dv_x = 0
-    rho = drho + rho_r 
-    w1 = - (rho * (dv_x *dv_x) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
-    
-   return w1
-  end
-  
-  
-  @inline function init_w0xx(x, t, equations::MomentSystem1D)
-    
-    @unpack theta_r, rho_r = equations 
-  
-    drho = shocktube_density(x, equations)
-    rho = drho + rho_r
-    dv_x = 0
-  
-    sigma_xx = 0.0
-    
-    w0xx = 0.5 * sigma_xx/(rho_r * theta_r) + (rho* dv_x * dv_x)/(3 * rho_r*theta_r) 
-    
-   return w0xx
-  end
-    
-   
-  
-  @inline function init_w1x(x, t, equations::MomentSystem1D)
-    
-    @unpack theta_r, rho_r = equations 
-
-    dv_x = 0
-    sigma_xx = 0.0
-    q_x = 0.0
-  
-    dtheta = shocktube_temp(x, equations)
-    drho = shocktube_density(x, equations)
-    rho = drho + rho_r
-  
-    w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
-  
-   return w1x
-  end
-  
