@@ -2,23 +2,22 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
-t = 0.4
-coordinates_min = (-1.0,)
-coordinates_max = ( 1.0,)
+# This elixir was one of the setups used in the following master thesis:
+# - Diana Sklema (2022)
+#   "Untersuchung eines gestoerten Momentensystems in der kompressiblen Stroeomungsmechanik"
+#   University of Cologne, advisors: Gregor Gassner, Michael Schlottke-Lakemper
 
-
-##############################################################################
-# semidiscretization of the Moment System
-
+###############################################################################
+# semidiscretization of the perturbated moment system
 
 vxr = 0.0
 theta_r = 1.0
 rho_r = 1.0 
+# use tau to regulate the mean free flight parameter
 tau = 0.001
 equations = MomentSystem1D(vxr, theta_r, rho_r, tau)
 
 initial_condition = initial_condition_constant
-
 
 boundary_condition = BoundaryConditionDirichlet(initial_condition)
 boundary_conditions = (x_neg=boundary_condition, x_pos=boundary_condition)
@@ -37,14 +36,15 @@ indicator_sc = IndicatorHennemannGassner(equations, basis,
                                          variable=shock_indicator_variable)
 volume_integral = VolumeIntegralShockCapturingHG(indicator_sc; volume_flux_dg=volume_flux, volume_flux_fv=surface_flux)
 
-
 solver = DGSEM(basis, surface_flux, volume_integral)
 
+coordinates_min = (-1.0,)
+coordinates_max = ( 1.0,)
+
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
-semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions,source_terms=source_terms_convergence_test)
+semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions,source_terms=source_productions)
 
-
-
+t = 0.4
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
@@ -58,7 +58,6 @@ analysis_interval = 100
 analysis_callback = AnalysisCallback(semi, interval=100)
 alive_callback = AliveCallback(analysis_interval=analysis_interval)
 
-
 # The SaveSolutionCallback allows to save the solution to a file in regular intervals
 save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
 
@@ -67,15 +66,12 @@ stepsize_callback = StepsizeCallback(cfl=0.3)
 
 save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
 
-
 # Create a CallbackSet to collect all callbacks such that they can be passed to the ODE solver
 callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, save_solution, stepsize_callback, save_restart)
-
 
 ###############################################################################
 # run the simulation
 sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
-#sol = solve(ode, SSPRK43(), save_everystep=false, callback=callbacks)
 
 # Print the timer summary
 summary_callback()
@@ -83,6 +79,6 @@ summary_callback()
 ###############################################################################
 # plot the simulation
 
-pd = PlotData1D(sol; solution_variables=cons2prim)
-
-plot(pd,linecolor ="green", guidefontsize = 10, legendfontsize= 10, titlefontsize = 20, tickfontsize=11, linewidth = 2, guidefont=font(19),size=(700,500))
+# Use this to generate the pictures from the thesis
+# pd = PlotData1D(sol; solution_variables=cons2prim)
+# plot(pd,linecolor ="green", guidefontsize = 10, legendfontsize= 10, titlefontsize = 20, tickfontsize=11, linewidth = 2, guidefont=font(19),size=(700,500))

@@ -2,11 +2,13 @@ using OrdinaryDiffEq
 using Trixi
 using Plots
 
+# This elixir was one of the setups used in the following master thesis:
+# - Diana Sklema (2022)
+#   "Untersuchung eines gestoerten Momentensystems in der kompressiblen Stroeomungsmechanik"
+#   University of Cologne, advisors: Gregor Gassner, Michael Schlottke-Lakemper
+# This elixir was used to generate the plots for the shocktube with euler equations
+# with the aim to compare it to the moment system
 
-
-t = 0.4
-coordinates_min = (-1.0,)
-coordinates_max = ( 1.0,)
 
 ##############################################################################
 # semidiscretization of the compressible Euler equations
@@ -37,11 +39,13 @@ volume_integral = VolumeIntegralShockCapturingHG(indicator_sc;
 
 solver = DGSEM(basis, surface_flux, volume_integral)
 
-
+coordinates_min = (-1.0,)
+coordinates_max = ( 1.0,)
 
 mesh = TreeMesh(coordinates_min, coordinates_max, initial_refinement_level=6, n_cells_max=10_000, periodicity=false)
 semi = SemidiscretizationHyperbolic(mesh, equations, initial_condition, solver, boundary_conditions=boundary_conditions)
 
+t = 0.4
 tspan = (0.0, t)
 ode = semidiscretize(semi, tspan)
 
@@ -55,7 +59,6 @@ analysis_interval = 100
 analysis_callback = AnalysisCallback(semi, interval=100)
 alive_callback = AliveCallback(analysis_interval=analysis_interval)
 
-
 # The SaveSolutionCallback allows to save the solution to a file in regular intervals
 save_solution = SaveSolutionCallback(interval=100,solution_variables=cons2prim)
 
@@ -67,14 +70,15 @@ save_restart = SaveRestartCallback(interval=100,save_final_restart=true)
 # Create a CallbackSet to collect all callbacks such that they can be passed to the ODE solver
 callbacks = CallbackSet(summary_callback, analysis_callback, alive_callback, save_solution, stepsize_callback, save_restart)
 
-
-
 # ###############################################################################
 # # run the simulation
 sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false), dt=1.0, save_everystep=false, callback=callbacks);
 
 summary_callback() # print the timer summary
 
-pds = PlotData1D(sol; solution_variables=cons2prim)
+###############################################################################
+# plot the simulation
 
-plot(pds, linecolor ="red", guidefontsize = 10, legendfontsize= 10, titlefontsize = 25, tickfontsize=11, linewidth = 3, guidefont=font(19),size=(700,500))
+# Use this to generate the pictures from the thesis
+#pds = PlotData1D(sol; solution_variables=cons2prim)
+#plot(pds, linecolor ="red", guidefontsize = 10, legendfontsize= 10, titlefontsize = 25, tickfontsize=11, linewidth = 3, guidefont=font(19),size=(700,500))

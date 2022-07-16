@@ -123,7 +123,7 @@ include("visualization/visualization.jl")
 export AcousticPerturbationEquations2D,
        CompressibleEulerEquations1D, CompressibleEulerEquations2D, CompressibleEulerEquations3D,
        CompressibleEulerMulticomponentEquations1D, CompressibleEulerMulticomponentEquations2D,
-       EulerEquations1D, MomentSystem1D,
+       EulerEquations1D, MomentSystem1D, MomentSystem2D,
        IdealGlmMhdEquations1D, IdealGlmMhdEquations2D, IdealGlmMhdEquations3D,
        IdealGlmMhdMulticomponentEquations1D, IdealGlmMhdMulticomponentEquations2D,
        HyperbolicDiffusionEquations1D, HyperbolicDiffusionEquations2D, HyperbolicDiffusionEquations3D,
@@ -158,7 +158,7 @@ export boundary_condition_periodic,
        boundary_condition_slip_wall,
        boundary_condition_wall
 
-export initial_condition_convergence_test, source_terms_convergence_test
+export initial_condition_convergence_test, source_terms_convergence_test, source_productions
 export source_terms_harmonic
 export initial_condition_poisson_nonperiodic, source_terms_poisson_nonperiodic, boundary_condition_poisson_nonperiodic
 export initial_condition_eoc_test_coupled_euler_gravity, source_terms_eoc_test_coupled_euler_gravity, source_terms_eoc_test_euler

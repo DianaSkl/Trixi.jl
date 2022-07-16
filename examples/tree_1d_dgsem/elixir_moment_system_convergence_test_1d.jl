@@ -57,6 +57,3 @@ sol = solve(ode, CarpenterKennedy2N54(williamson_condition=false),
 
 
 summary_callback()
-
-pd = PlotData1D(sol; solution_variables=cons2prim)
-plot(pd)

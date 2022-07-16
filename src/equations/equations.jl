@@ -294,7 +294,7 @@ include("euler_1d.jl")
 # Moment System
 abstract type AbstractMomentSystem{NDIMS, NVARS} <: AbstractEquations{NDIMS, NVARS} end
 include("moment_system_1d.jl")
-#include("moment_system_2d.jl")
+include("moment_system_2d.jl")
 
 # CompressibleEulerMulticomponentEquations
 abstract type AbstractCompressibleEulerMulticomponentEquations{NDIMS, NVARS, NCOMP} <: AbstractEquations{NDIMS, NVARS} end

@@ -12,7 +12,7 @@ struct MomentSystem1D{RealT<:Real} <: AbstractMomentSystem{1, 5}
 
   
 varnames(::typeof(cons2prim), ::MomentSystem1D) = ("ρ", "v\u2093", "p", "σ\u2093\u2093", "q\u2093")
-varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u207D\u2070\u207E\u2093", "w\u207D\u00B9\u207E", "w\u207D\u2070\u207E\u2093\u2093", "w\u207D\u00B9\u207E\u2093" )
+varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w0", "w0x", "w1","w0xx", "w1x")
 
 # Calculate 1D flux for a single point 
 @inline function flux(u, orientation::Integer, equations::MomentSystem1D)
@@ -33,10 +33,8 @@ varnames(::typeof(cons2cons), ::MomentSystem1D) = ("w\u207D\u2070\u207E", "w\u20
 
   """
   flux_ds(u_ll, u_rr, orientation, equations::MomentSystem1D)
-
-Kinetic energy preserving two-point flux for the 1d perturbated moment system
-
-"""  
+  Kinetic energy preserving two-point flux for the 1d perturbated moment system
+  """  
   @inline function flux_ds(u_ll, u_rr, orientation::Integer, equations::MomentSystem1D)
 
     @unpack vxr, theta_r, rho_r = equations
@@ -145,9 +143,8 @@ Kinetic energy preserving two-point flux for the 1d perturbated moment system
       
   """
   initial_condition_convergence_test(x, t, equations::MomentSystem1D)
-
   periodical initial condition for the method of manufactured solution
-"""
+  """
    
   function initial_condition_convergence_test(x, t, equations::MomentSystem1D)
     
@@ -181,38 +178,12 @@ Kinetic energy preserving two-point flux for the 1d perturbated moment system
   
   """
   source_terms_convergence_test(u, x, t, equations::MomentSystem1D)
-
-Use source_convergence_spatialtime for convergence tests in combination with
-[`initial_condition_convergence_test`](@ref).
-
-Use source_productions for all physical problems where the original source term is needed
-"""
+  Use source_convergence_spatialtime for convergence tests in combination with
+  [`initial_condition_convergence_test`](@ref).
+  """
 
   @inline function source_terms_convergence_test(u, x, t, equations::MomentSystem1D)
         
-   # variable x and t 
-   f1,f2,f3,f4,f5 = source_convergence_spatialtime(u, x, t, equations::MomentSystem1D)
-
-   # original productions
-   #f1,f2,f3,f4,f5 = source_productions(u, equations::MomentSystem1D)
-   
-    return(f1,f2,f3,f4,f5)
-  end 
-
-
-  @inline function source_productions(u, equations::MomentSystem1D)
-
-    @unpack tau = equations 
-    w0, w0x, w1, w0xx, w1x = u
-  
-    p1 = -w0 * w0xx + w0x * w0x/3.0
-    p2 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0
-  
-    return (0,0,0,p1/tau,p2/tau)
-  end 
-
-  @inline function source_convergence_spatialtime(u, x, t, equations::MomentSystem1D)
-    
     @unpack vxr, theta_r, rho_r, tau = equations 
 
     c = 2
@@ -245,16 +216,30 @@ Use source_productions for all physical problems where the original source term 
     f4  = -dw0xx_x + vxr * dw0xx_x + 2.0 * stheta * (dw0x_x - dw1x_x)/3.0 
     f5  = -dw1x_x + vxr * dw1x_x + stheta * (dw1_x - 4.0 * dw0xx_x/5.0) 
 
-   return (f1,f2,f3,f4,f5)
-  end
+   
+    return(f1,f2,f3,f4,f5)
+  end 
 
+  """
+  source_productions(u, x, t, equations::MomentSystem1D)
+  Use source_productions for all physical problems where the original source term is needed
+  """
 
+  @inline function source_productions(u, x, t, equations::MomentSystem1D)
+
+    @unpack tau = equations 
+    w0, w0x, w1, w0xx, w1x = u
+  
+    p1 = -w0 * w0xx + w0x * w0x/3.0
+    p2 = -2.0 * w0 * w1x/3.0 + 2.0 * w1 * w0x/3.0 + 4.0 * w0x * w0xx/15.0
+  
+    return (0,0,0,p1/tau,p2/tau)
+  end 
       
   """
   initial_condition_constant(x, t, equations::MomentSystem1D)
-
-A constant initial condition to test the shocktube problem
-"""
+  constant initial condition to test the shocktube problem
+  """
   function initial_condition_constant(x, t, equations::MomentSystem1D)
   
     return SVector(init_w0(x, t, equations::MomentSystem1D), 
@@ -290,81 +275,6 @@ A constant initial condition to test the shocktube problem
   
     return dtheta
     end
-
-
-
-@inline function init_w0(x, t, equations::MomentSystem1D)
-  @unpack rho_r = equations 
-
-  drho = shocktube_density(x, equations)
-  w0 = 1 + drho / rho_r
- return w0
-end
-
-
-@inline function init_w0x(x, t, equations::MomentSystem1D)
-  
-  @unpack theta_r, rho_r = equations 
-
-
-  drho = shocktube_density(x, equations)
-
-  dv_x = 0
-  
-  w0x = dv_x / sqrt(theta_r) + (drho * dv_x)/(rho_r * sqrt(theta_r))
-
- return w0x
-end
-
-
-
-@inline function init_w1(x, t, equations::MomentSystem1D)
-  
-  @unpack theta_r, rho_r = equations 
-  drho = shocktube_density(x, equations)
-  dtheta = shocktube_temp(x, equations)
-  dv_x = 0
-  rho = drho + rho_r 
-  w1 = - (rho * (dv_x *dv_x) )/(3.0 * (rho_r * theta_r)) - (drho * dtheta)/(rho_r * theta_r) - dtheta / theta_r
-  
- return w1
-end
-
-
-@inline function init_w0xx(x, t, equations::MomentSystem1D)
-  
-  @unpack theta_r, rho_r = equations 
-
-  drho = shocktube_density(x, equations)
-  rho = drho + rho_r
-  dv_x = 0
-
-  sigma_xx = 0.0
-  
-  w0xx = 0.5 * sigma_xx/(rho_r * theta_r) + (rho* dv_x * dv_x)/(3 * rho_r*theta_r) 
-  
- return w0xx
-end
-  
- 
-
-@inline function init_w1x(x, t, equations::MomentSystem1D)
-  
-  @unpack theta_r, rho_r = equations 
-
-  dv_x = 0
-  sigma_xx = 0.0
-  q_x = 0.0
-
-  dtheta = shocktube_temp(x, equations)
-  drho = shocktube_density(x, equations)
-  rho = drho + rho_r
-
-  w1x = - 2.0 * q_x / (5.0* rho_r * sqrt(theta_r).^3.0) - (2.0 * (sigma_xx * dv_x))/(5.0*rho_r* sqrt(theta_r).^3.0) - (dtheta * dv_x * rho)/ (rho_r * sqrt(theta_r).^3.0) - rho * (dv_x^3)/(5.0 * rho_r * sqrt(theta_r).^3.0)
-
- return w1x
-end
-
   
   @inline function init_w0(x, t, equations::MomentSystem1D)
     @unpack rho_r = equations 
