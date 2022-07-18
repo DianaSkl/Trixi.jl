@@ -1,13 +1,13 @@
-using OrdinaryDiffEq
-using Trixi
-using Plots
-
 # This elixir was one of the setups used in the following master thesis:
 # - Diana Sklema (2022)
 #   "Untersuchung eines gestoerten Momentensystems in der kompressiblen Stroeomungsmechanik"
 #   University of Cologne, advisors: Gregor Gassner, Michael Schlottke-Lakemper
 #  Run "convergence_test(joinpath(examples_dir(), "tree_1d_dgsem", "elixir_moment_system_convergence_test_1d.jl"), 4)"
 #  for the 1D convergence test starting with refinement 2
+
+using OrdinaryDiffEq
+using Trixi
+using Plots
 
 ###############################################################################
 # semidiscretization of the perturbated moment system

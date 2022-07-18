@@ -1,11 +1,11 @@
-using OrdinaryDiffEq
-using Trixi
-using Plots
-
 # This elixir was one of the setups used in the following master thesis:
 # - Diana Sklema (2022)
 #   "Untersuchung eines gestoerten Momentensystems in der kompressiblen Stroeomungsmechanik"
 #   University of Cologne, advisors: Gregor Gassner, Michael Schlottke-Lakemper
+
+using OrdinaryDiffEq
+using Trixi
+using Plots
 
 ###############################################################################
 # semidiscretization of the perturbated moment system
@@ -79,6 +79,6 @@ summary_callback()
 ###############################################################################
 # plot the simulation
 
-# Use this to generate the pictures from the thesis
+# Use this to generate the plots from the thesis
 # pd = PlotData1D(sol; solution_variables=cons2prim)
 # plot(pd,linecolor ="green", guidefontsize = 10, legendfontsize= 10, titlefontsize = 20, tickfontsize=11, linewidth = 2, guidefont=font(19),size=(700,500))

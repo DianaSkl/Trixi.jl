@@ -1,7 +1,3 @@
-using OrdinaryDiffEq
-using Trixi
-using Plots
-
 # This elixir was one of the setups used in the following master thesis:
 # - Diana Sklema (2022)
 #   "Untersuchung eines gestoerten Momentensystems in der kompressiblen Stroeomungsmechanik"
@@ -9,6 +5,9 @@ using Plots
 # This elixir was used to generate the plots for the shocktube with euler equations
 # with the aim to compare it to the moment system
 
+using OrdinaryDiffEq
+using Trixi
+using Plots
 
 ##############################################################################
 # semidiscretization of the compressible Euler equations

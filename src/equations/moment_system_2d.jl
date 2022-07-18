@@ -84,7 +84,7 @@ Kinetic energy preserving two-point flux for the 2d perturbated moment system
   return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
 end
 
-  
+# Convert conservative to primitive variables
 @inline function cons2prim(u, equations::MomentSystem2D)
     w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
     @unpack vxr, vyr, theta_r, rho_r = equations
@@ -223,43 +223,12 @@ end
     return SVector(w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y)
   end
   
-  
-  
+  """
+  source_terms_convergence_test(u, x, t, equations::MomentSystem2D)
+  Use source_convergence_spatialtime for convergence tests in combination with
+  [`initial_condition_convergence_test`](@ref).
+  """ 
   @inline function source_terms_convergence_test(u, x, t, equations::MomentSystem2D)
-    
-  @unpack vxr, vyr, theta_r, rho_r, tau = equations
-  
-   #convtest zeit&raum
-   #f1,f2,f3,f4,f5,f6,f7,f8,f9 = source_convergence_spatialtime(u, x, t, equations::MomentSystem2D)
-    
-   #produktionen
-   f1,f2,f3,f4,f5,f6,f7,f8,f9 = source_productions(u, equations::MomentSystem2D)
-
-   
-   return (f1,f2,f3,f4,f5,f6,f7,f8,f9)
-
- end 
-  
-    
-  
-  @inline function source_productions(u, equations::MomentSystem2D)
-
-    @unpack tau = equations 
-    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
-  
-
-     p1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
-     p2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
-     p3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
-     p4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
-     p5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
-
-    return (0,0,0,0,p1/tau,p2/tau,p3/tau,p4/tau,p5/tau)
-  end 
-
-
-
-  @inline function source_convergence_spatialtime(u,x,t,equations::MomentSystem2D)
     @unpack vxr, vyr, theta_r, rho_r, tau = equations
     c = 2
     A = 0.1
@@ -306,21 +275,34 @@ end
    f8 = -dw1x_x + vxr * dw1x_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0xx_x/5.0) + vyr * dw1x_x - sqrt(theta_r) * 4.0 * dw0xy_x / 5.0 
    f9 = -dw1y_x + vxr * dw1y_x - 4.0 * sqrt(theta_r) * dw0xy_x / 5.0 + vyr * dw1y_x + sqrt(theta_r) * (dw1_x - 4.0 * dw0yy_x / 5.0) 
 
-    return (f1,f2,f3,f4,f5,f6,f7,f8,f9)
- end  
+   return SVector(f1, f2, f3, f4, f5, f6, f7, f8, f9)
+
+ end 
   
-  function shocktube(x, equations::MomentSystem2D)
-    rho_r = 1
+    
+ """
+ source_productions(u, x, t, equations::MomentSystem2D)
+ Use source_productions for all physical problems where the original source term is needed
+ """
+ @inline function source_productions(u, x, t, equations::MomentSystem2D)
+
+    @unpack tau = equations 
+    w0, w0x, w0y, w1, w0xx, w0yy, w0xy, w1x, w1y = u
   
-    if (x[1] < -20 || (x[1]<0 && x[1]>=-10) || (x[1]>=10 && x[1]<20))
-      drho = 3 - rho_r
-    elseif ((x[1] < -10 && x[1] >= -20) || (x[1]>=0 && x[1] <10) || x[1] >= 20)
-      drho = 1 - rho_r
-    end
-  
-    return drho
-    end
-  
+
+     p1 = -w0 * w0xx + w0x * w0x/ 3.0 - w0y * w0y/ 6.0 
+     p2 = -w0 * w0yy - w0x * w0x/ 6.0 + w0y * w0y/ 3.0
+     p3 = -w0 * w0xy + w0x * w0y/ 4.0 + w0y * w0x/ 4.0
+     p4 = 2.0 * w1 * w0x / 3.0 + 4.0 * w0x * w0xx/15.0 + 4.0 * w0y * w0xy/ 15.0 - 2.0 * w0 * w1x / 3.0
+     p5 = 2.0 * w1 * w0y / 3.0 + 4.0 * w0y * w0yy/ 15.0 + 4.0 * w0x * w0xy/15.0 - 2.0 * w0 * w1y / 3.0
+
+    return (0,0,0,0,p1/tau,p2/tau,p3/tau,p4/tau,p5/tau)
+  end 
+
+  """
+  initial_condition_constant(x, t, equations::MomentSystem2D)
+  constant initial condition to test the shocktube problem
+  """
   function initial_condition_constant(x, t, equations::MomentSystem2D)
   
     return SVector(init_w0(x, t, equations::MomentSystem2D), 
@@ -333,8 +315,21 @@ end
                    init_w1x(x, t, equations::MomentSystem2D),
                    init_w1y(x, t, equations::MomentSystem2D))
   end
+
+
+  # initialization of the density for the shocktube problem
+  function shocktube(x, equations::MomentSystem2D)
+    rho_r = 1
   
+    if (x[1] < -20 || (x[1]<0 && x[1]>=-10) || (x[1]>=10 && x[1]<20))
+      drho = 3 - rho_r
+    elseif ((x[1] < -10 && x[1] >= -20) || (x[1]>=0 && x[1] <10) || x[1] >= 20)
+      drho = 1 - rho_r
+    end
   
+    return drho
+    end
+
   @inline function init_w0(x, t, equations::MomentSystem2D)
    
     rho_r = 1
