@@ -107,5 +107,5 @@ summary_callback() # print the timer summary
 # plot the simulation
 
 # Use this to generate the plots from the thesis
- pdt2 = PlotData2D(sol; solution_variables=cons2prim)
- plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
+#  pdt2 = PlotData2D(sol; solution_variables=cons2prim)
+#  plot(pdt2, size = (1900,1200),  titlefontsize = 21, tickfontsize=12)
